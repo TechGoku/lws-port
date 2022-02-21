@@ -200,6 +200,7 @@ public:
   template <typename RPC>
   typename RPC::response binary(std::string_view target_, const typename RPC::request& req)
   {
+    std::cout <<" calling before the core rpc server " << std::endl;
     std::string target{target_};
     std::string req_serialized;
     if(!epee::serialization::store_t_to_binary(req, req_serialized))

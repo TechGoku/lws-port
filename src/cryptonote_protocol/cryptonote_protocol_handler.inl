@@ -473,10 +473,13 @@ namespace cryptonote
         std::chrono::seconds behindtime =abs_diff * TARGET_BLOCK_TIME;
         if (hf17)
         {
-            behindtime = std::min(abs_diff,*hf17) * TARGET_BLOCK_TIME;//the old Blocktime
-            if (max_block_height > *hf17){
-                behindtime = behindtime + ((max_block_height-*hf17)*TARGET_BLOCK_TIME_V17);
-            }
+            behindtime = std::min(abs_diff,*hf17) * TARGET_BLOCK_TIME_V17; //the old Blocktime
+            // if (max_block_height > *hf17){
+            //               std::cout<<"inside HF17 if"<<std::endl;
+            //     behindtime = behindtime + ((max_block_height-*hf17)*TARGET_BLOCK_TIME_V17);
+            //     std::cout << "behindtime if : " << tools::get_human_readable_timespan(behindtime)  << std::endl;
+
+            // }
         }
         else{
             for (static bool oncehf17= true; oncehf17; oncehf17 = !oncehf17)

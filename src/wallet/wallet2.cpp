@@ -2651,6 +2651,7 @@ void wallet2::process_new_blockchain_entry(const cryptonote::block& b, const cry
 //----------------------------------------------------------------------------------------------------
 void wallet2::get_short_chain_history(std::list<crypto::hash>& ids, uint64_t granularity) const
 {
+  std::cout << " get short chain history function called for req.block_ids : " << std::endl;
   size_t i = 0;
   size_t current_multiplier = 1;
   size_t blockchain_size = std::max((size_t)(m_blockchain.size() / granularity * granularity), m_blockchain.offset());
@@ -2721,6 +2722,7 @@ void wallet2::pull_hashes(uint64_t start_height, uint64_t &blocks_start_height, 
   cryptonote::rpc::GET_HASHES_FAST::response res{};
   req.block_ids = short_chain_history;
 
+  std::cout << " start_height : " << start_height << std::endl;
   req.start_height = start_height;
   bool r = invoke_http<rpc::GET_HASHES_FAST>(req, res);
   THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "gethashes.bin");
@@ -3299,6 +3301,7 @@ void wallet2::process_pool_state(const std::vector<get_pool_state_tx> &txs)
 //----------------------------------------------------------------------------------------------------
 void wallet2::fast_refresh(uint64_t stop_height, uint64_t &blocks_start_height, std::list<crypto::hash> &short_chain_history, bool force)
 {
+  std::cout << " fast refresh function called" << std::endl;
   std::vector<crypto::hash> hashes;
 
   uint64_t checkpoint_height          = 0;
@@ -3318,6 +3321,8 @@ void wallet2::fast_refresh(uint64_t stop_height, uint64_t &blocks_start_height, 
   size_t current_index = m_blockchain.size();
   while(m_run.load(std::memory_order_relaxed) && current_index < stop_height)
   {
+     std::cout << " current_index : " << current_index << std::endl;
+     std::cout << " stop_height : " << stop_height << std::endl;
     pull_hashes(0, blocks_start_height, short_chain_history, hashes);
     if (hashes.size() <= 3)
       return;
@@ -3419,6 +3424,7 @@ std::shared_ptr<std::map<std::pair<uint64_t, uint64_t>, size_t>> wallet2::create
 //----------------------------------------------------------------------------------------------------
 void wallet2::refresh(bool trusted_daemon, uint64_t start_height, uint64_t & blocks_fetched, bool& received_money, bool check_pool)
 {
+  std::cout << " refresh function called " <<std::endl;
   if (m_offline)
   {
     blocks_fetched = 0;
@@ -3475,9 +3481,13 @@ void wallet2::refresh(bool trusted_daemon, uint64_t start_height, uint64_t & blo
   // pull the first set of blocks
   get_short_chain_history(short_chain_history, (m_first_refresh_done || trusted_daemon) ? 1 : FIRST_REFRESH_GRANULARITY);
   m_run.store(true, std::memory_order_relaxed);
+  std::cout << "m_blockchain.size() : " << m_blockchain.size() << std::endl;
+  std::cout << " start_height in refresh : " << start_height << std::endl;
+  std::cout << " m refresh_from_block_height : " << m_refresh_from_block_height << std::endl;
   if (start_height > m_blockchain.size() || m_refresh_from_block_height > m_blockchain.size()) {
     if (!start_height)
       start_height = m_refresh_from_block_height;
+      std::cout << " m refresh_from_block_height in loop : " << m_refresh_from_block_height << std::endl;
     // we can shortcut by only pulling hashes up to the start_height
     fast_refresh(start_height, blocks_start_height, short_chain_history);
     // regenerate the history now that we've got a full set of hashes

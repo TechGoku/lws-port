@@ -266,6 +266,31 @@ namespace rpc {
   };
 
   BELDEX_RPC_DOC_INTROSPECT
+  // Get hashes. rpc request.
+  struct GET_HASHES_FAST_RPC : PUBLIC, LEGACY
+  {
+    static constexpr auto names() { return NAMES("get_hashes", "gethashes"); }
+
+    struct request
+    {
+      std::list<crypto::hash> block_ids; // First 10 blocks id goes sequential, next goes in pow(2,n) offset, like 2, 4, 8, 16, 32, 64 and so on, and the last one is always genesis block */
+      uint64_t    start_height;          // The starting block's height.
+
+      KV_MAP_SERIALIZABLE
+    };
+
+    struct response
+    {
+      std::vector<crypto::hash> m_block_ids; // Binary array of hashes, See block_ids above.
+      uint64_t    start_height;              // The starting block's height.
+      uint64_t    current_height;            // The current block height.
+      std::string status;                    // General RPC error code. "OK" means everything looks good.
+      bool untrusted;                        // States if the result is obtained using the bootstrap mode, and is therefore not trusted (`true`), or when the daemon is fully synced (`false`).
+
+      KV_MAP_SERIALIZABLE
+    };
+  };
+  BELDEX_RPC_DOC_INTROSPECT
   // Look up one or more transactions by hash.
   struct GET_TRANSACTIONS : PUBLIC, LEGACY
   {
@@ -2582,6 +2607,7 @@ namespace rpc {
     GET_BLOCKS_BY_HEIGHT,
     GET_ALT_BLOCKS_HASHES,
     GET_HASHES_FAST,
+    GET_HASHES_FAST_RPC,
     GET_TRANSACTIONS,
     IS_KEY_IMAGE_SPENT,
     GET_TX_GLOBAL_OUTPUTS_INDEXES,

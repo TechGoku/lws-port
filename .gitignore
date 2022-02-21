@@ -1,6 +1,9 @@
 .DS_Store
 /doc
 /build*
+/.vscode*
+.vscode*
+/.vscode/settings.json
 /compile_commands.json
 /.cache
 /tags
