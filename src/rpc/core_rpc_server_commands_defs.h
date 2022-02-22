@@ -281,7 +281,7 @@ namespace rpc {
 
     struct response
     {
-      std::vector<crypto::hash> m_block_ids; // Binary array of hashes, See block_ids above.
+      std::vector<std::string> m_block_ids; // Binary array of hashes, See block_ids above.
       uint64_t    start_height;              // The starting block's height.
       uint64_t    current_height;            // The current block height.
       std::string status;                    // General RPC error code. "OK" means everything looks good.

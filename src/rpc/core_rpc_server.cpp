@@ -658,15 +658,18 @@ namespace cryptonote { namespace rpc {
       return res;
 
     res.start_height = req.start_height;
-    if(!m_core.get_blockchain_storage().find_blockchain_supplement_rpc(req.block_ids, res.m_block_ids, res.start_height, res.current_height, false))
+    std::vector<crypto::hash> blk_ids;
+    if(!m_core.get_blockchain_storage().find_blockchain_supplement_rpc(req.block_ids, blk_ids, res.start_height, res.current_height, false))
     {
       res.status = "Failed";
       return res;
     }
 
-   for (auto &res_m_blocks_id_rpc : res.m_block_ids)
+   res.m_block_ids.reserve(blk_ids.size());
+
+   for (const crypto::hash &m_blocks_id : blk_ids)
     {
-      std::cout << " res_m_blocks_id_rpc : " << res_m_blocks_id_rpc << std::endl;
+       res.m_block_ids.push_back(tools::type_to_hex(m_blocks_id));
     }
     
 
