@@ -40,6 +40,7 @@
 #include "../misc_language.h"
 #include "local_ip.h"
 #include "../pragma_comp_defs.h"
+#include "abstract_tcp_server2.h"
 
 #include <chrono>
 #include <thread>

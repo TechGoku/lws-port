@@ -6,6 +6,7 @@
 #include <string>
 #include "db/storage.h"
 #include "db/data.h"
+constexpr auto RED = "\033[31;1m";
 namespace lws
 {
     class scanner
@@ -25,7 +26,9 @@ namespace lws
         static bool is_running() noexcept { return running; }
 
         //! Stops all scanner instances globally.
-        static void stop() noexcept { running = false; }
+        static void stop() noexcept {
+            std::cout << RED << "stop called" << std::endl;
+             running = false; }
     };
 
 } //lws
