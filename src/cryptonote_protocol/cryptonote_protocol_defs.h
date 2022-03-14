@@ -122,6 +122,15 @@ namespace cryptonote
     KV_MAP_SERIALIZABLE
   };
 
+  BELDEX_RPC_DOC_INTROSPECT
+  struct block_complete_entry_rpc
+  {
+    std::string block;
+    std::vector<std::string> txs;
+    blobdata checkpoint;
+    std::vector<serializable_flash_metadata> flashes;
+    KV_MAP_SERIALIZABLE
+  };
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/

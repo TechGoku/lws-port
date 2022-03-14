@@ -547,6 +547,78 @@ namespace cryptonote { namespace rpc {
     res.status = STATUS_OK;
     return res;
   }
+  
+  //------------------------------------------------------------------------------------------------------------------------------
+  GET_BLOCKS_FAST_RPC::response core_rpc_server::invoke(GET_BLOCKS_FAST_RPC::request&& req, rpc_context context)
+  {
+    GET_BLOCKS_FAST_RPC::response res{};
+
+    PERF_TIMER(on_get_blocks);
+    if (use_bootstrap_daemon_if_necessary<GET_BLOCKS_FAST_RPC>(req, res))
+      return res;
+    std::cout << "Not Entering Bootstartp Node" << std::endl;
+    std::vector<std::pair<std::pair<cryptonote::blobdata, crypto::hash>, std::vector<std::pair<crypto::hash, cryptonote::blobdata> > > > bs;
+
+    if(!m_core.find_blockchain_supplement(req.start_height, req.block_ids, bs, res.current_height, res.start_height, req.prune, !req.no_miner_tx, GET_BLOCKS_FAST_RPC::MAX_COUNT))
+    {
+      res.status = "Failed";
+      return res;
+    }
+
+    size_t size = 0, ntxes = 0;
+    res.blocks.reserve(bs.size());
+    res.output_indices.reserve(bs.size());
+    for(auto& bd: bs)
+    {
+      // std::cout << "bd.first.second : " << bd.first.second << std::endl;
+      res.blocks.resize(res.blocks.size()+1);
+      res.blocks.back().block = tools::type_to_hex(bd.first.second);
+      std::cout << "res.blocks.back().block : " << res.blocks.back().block << std::endl;
+      size += bd.first.first.size();
+      res.output_indices.push_back(GET_BLOCKS_FAST_RPC::block_output_indices());
+      ntxes += bd.second.size();
+      res.output_indices.back().indices.reserve(1 + bd.second.size());
+      if (req.no_miner_tx)
+        res.output_indices.back().indices.push_back(GET_BLOCKS_FAST_RPC::tx_output_indices());
+      res.blocks.back().txs.reserve(bd.second.size());
+      for (std::vector<std::pair<crypto::hash, cryptonote::blobdata>>::iterator i = bd.second.begin(); i != bd.second.end(); ++i)
+      {
+        // std::cout <<"i->first : " << i->first << std::endl;
+        res.blocks.back().txs.push_back({std::move(tools::type_to_hex(i->first)), crypto::null_hash});
+        std::cout <<"res.blocks.back().txs : " << res.blocks.back().txs.back() << std::endl;
+        i->second.clear();
+        i->second.shrink_to_fit();
+        size += res.blocks.back().txs.back().size();
+      }
+
+      const size_t n_txes_to_lookup = bd.second.size() + (req.no_miner_tx ? 0 : 1);
+      // std::cout << "n_txes_to_lookup : " << n_txes_to_lookup << std::endl;
+      if (n_txes_to_lookup > 0)
+      {
+        std::vector<std::vector<uint64_t>> indices;
+        bool r = m_core.get_tx_outputs_gindexs(req.no_miner_tx ? bd.second.front().first : bd.first.second, n_txes_to_lookup, indices);
+        if (!r || indices.size() != n_txes_to_lookup || res.output_indices.back().indices.size() != (req.no_miner_tx ? 1 : 0))
+        {
+          res.status = "Failed";
+          return res;
+        }
+        for (size_t i = 0; i < indices.size(); ++i)
+          res.output_indices.back().indices.push_back({std::move(indices[i])});
+      }
+    }
+
+    for(auto it : res.blocks)
+    {
+      std::cout << " it->block : " << it.block <<std::endl;
+      for(auto tx :it.txs)
+      std::cout << " it->txs : " << tx <<std::endl;
+    }
+
+    MDEBUG("on_get_blocks: " << bs.size() << " blocks, " << ntxes << " txes, size " << size);
+    res.status = STATUS_OK;
+    return res;
+  }
+  //---------------------------------------------------------------------------------------------------------------------------
   GET_ALT_BLOCKS_HASHES::response core_rpc_server::invoke(GET_ALT_BLOCKS_HASHES::request&& req, rpc_context context)
   {
     GET_ALT_BLOCKS_HASHES::response res{};
