@@ -10,7 +10,6 @@
 #include "wire/field.h"
 #include "wire/filters.h"
 #include "wire/traits.h"
-// #include "json/write.h"
 
 namespace wire
 {
@@ -108,10 +107,12 @@ namespace wire_write
       calls to `write_bytes` in this namespace to "find" user functions that are
       declared after these functions. */
 
-   template<typename T>
-  epee::byte_slice to_bytes(const T& source)
+  template<typename W, typename T>
+  inline epee::byte_slice to_bytes(const T& value)
   {
-    return wire_write::to_bytes<json_slice_writer>(source);
+    W dest{};
+    write_bytes(dest, value);
+    return dest.take_bytes();
   }
 
   template<typename W, typename T, typename F = wire::identity_>
@@ -165,8 +166,6 @@ namespace wire_write
     }
     dest.end_object();
   }
-  template<typename T>
-  epee::byte_slice to_bytes(const T& source);
 } // wire_write
 
 namespace wire

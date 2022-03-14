@@ -8,7 +8,6 @@
 #include "crypto/crypto.h"  //beldex/src
 #include "fwd.h"
 #include "db/fwd.h"
-#include "data.h"
 
 namespace lws
 {

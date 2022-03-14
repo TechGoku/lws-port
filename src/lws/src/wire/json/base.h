@@ -10,6 +10,9 @@ namespace wire
 {
   struct json
   {
+    using input_type = json_reader;
+    using output_type = json_writer;
+
     template<typename T>
     static expect<T> from_bytes(std::string&& source);
 
