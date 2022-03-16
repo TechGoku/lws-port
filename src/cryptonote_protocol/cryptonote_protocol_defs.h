@@ -126,6 +126,8 @@ namespace cryptonote
   struct block_complete_entry_rpc
   {
     std::string block;
+    std::string block_hash;
+    uint64_t timestamp;
     std::vector<std::string> txs;
     blobdata checkpoint;
     std::vector<serializable_flash_metadata> flashes;

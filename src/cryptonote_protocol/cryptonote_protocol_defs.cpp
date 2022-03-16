@@ -57,6 +57,8 @@ KV_SERIALIZE_MAP_CODE_END()
 
 KV_SERIALIZE_MAP_CODE_BEGIN(block_complete_entry_rpc)
   KV_SERIALIZE(block)
+  KV_SERIALIZE(block_hash)
+  KV_SERIALIZE(timestamp)
   KV_SERIALIZE(txs)
   KV_SERIALIZE(checkpoint)
   KV_SERIALIZE(flashes)

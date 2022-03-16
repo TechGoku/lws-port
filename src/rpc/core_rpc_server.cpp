@@ -568,12 +568,17 @@ namespace cryptonote { namespace rpc {
     size_t size = 0, ntxes = 0;
     res.blocks.reserve(bs.size());
     res.output_indices.reserve(bs.size());
+    block blk;
+    int block_height = req.start_height;
     for(auto& bd: bs)
     {
-      // std::cout << "bd.first.second : " << bd.first.second << std::endl;
       res.blocks.resize(res.blocks.size()+1);
       res.blocks.back().block = tools::type_to_hex(bd.first.second);
-      std::cout << "res.blocks.back().block : " << res.blocks.back().block << std::endl;
+      if (!m_core.get_block_by_height(block_height, blk))
+        throw rpc_error{ERROR_INTERNAL, "Internal error: can't get block by height. Height = " + std::to_string(req.start_height) + '.'};
+      res.blocks.back().block_hash = tools::type_to_hex(get_block_hash(blk));
+      res.blocks.back().timestamp = blk.timestamp;
+      ++block_height;
       size += bd.first.first.size();
       res.output_indices.push_back(GET_BLOCKS_FAST_RPC::block_output_indices());
       ntxes += bd.second.size();
@@ -585,7 +590,7 @@ namespace cryptonote { namespace rpc {
       {
         // std::cout <<"i->first : " << i->first << std::endl;
         res.blocks.back().txs.push_back({std::move(tools::type_to_hex(i->first)), crypto::null_hash});
-        std::cout <<"res.blocks.back().txs : " << res.blocks.back().txs.back() << std::endl;
+        // std::cout <<"res.blocks.back().txs : " << res.blocks.back().txs.back() << std::endl;
         i->second.clear();
         i->second.shrink_to_fit();
         size += res.blocks.back().txs.back().size();
@@ -607,12 +612,12 @@ namespace cryptonote { namespace rpc {
       }
     }
 
-    for(auto it : res.blocks)
-    {
-      std::cout << " it->block : " << it.block <<std::endl;
-      for(auto tx :it.txs)
-      std::cout << " it->txs : " << tx <<std::endl;
-    }
+    // for(auto it : res.blocks)
+    // {
+    //   std::cout << " it->block : " << it.block <<std::endl;
+    //   for(auto tx :it.txs)
+    //   std::cout << " it->txs : " << tx <<std::endl;
+    // }
 
     MDEBUG("on_get_blocks: " << bs.size() << " blocks, " << ntxes << " txes, size " << size);
     res.status = STATUS_OK;
