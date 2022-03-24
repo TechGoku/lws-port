@@ -33,6 +33,7 @@
 #include "cryptonote_basic/difficulty.h"
 #include "ringct/rctSigs.h"
 #include "rpc/rpc_handler.h"
+// #include "rpc/core_rpc_server_commands_defs.h"
 
 #include <unordered_map>
 #include <vector>
@@ -43,11 +44,11 @@ namespace cryptonote
 namespace rpc
 {
 
-  struct block_with_transactions
-  {
-    cryptonote::block block;
-    std::vector<cryptonote::transaction> transactions;
-  };
+  // struct block_with_transactions
+  // {
+  //   cryptonote::block block;
+  //   std::vector<cryptonote::transaction> transactions;
+  // };
 
   typedef std::vector<uint64_t> tx_output_indices;
 
@@ -202,12 +203,12 @@ namespace rpc
     std::string version;
   };
 
-  struct output_distribution
-  {
-    output_distribution_data data;
-    uint64_t amount;
-    bool cumulative;
-  };
+  // struct output_distribution
+  // {
+  //   output_distribution_data data;
+  //   uint64_t amount;
+  //   bool cumulative;
+  // };
 }  // namespace rpc
 
 }  // namespace cryptonote

@@ -65,6 +65,10 @@
 #include "core_rpc_server_error_codes.h"
 #include "p2p/net_node.h"
 #include "version.h"
+#include <nlohmann/json.hpp>
+#include "rpc/message_data_structs.h"
+using json = nlohmann::json;
+
 
 #undef BELDEX_DEFAULT_LOG_CATEGORY
 #define BELDEX_DEFAULT_LOG_CATEGORY "daemon.rpc"
@@ -568,45 +572,128 @@ namespace cryptonote { namespace rpc {
     size_t size = 0, ntxes = 0;
     res.blocks.reserve(bs.size());
     res.output_indices.reserve(bs.size());
-    block blk;
-    int block_height = req.start_height;
-    for(auto& bd: bs)
+    // block blk;
+    // cryptonote::transaction tx;
+    // int block_height = req.start_height;
+    // for(auto& bd: bs)
+    // {
+    //   res.blocks.resize(res.blocks.size()+1);
+    //   res.blocks.back().block = obj_to_json_str(blk);
+    //   if (!m_core.get_block_by_height(block_height, blk))
+    //     throw rpc_error{ERROR_INTERNAL, "Internal error: can't get block by height. Height = " + std::to_string(req.start_height) + '.'};
+    //   res.blocks.back().block_hash = tools::type_to_hex(get_block_hash(blk));
+    //   res.blocks.back().timestamp = blk.timestamp;
+    //   ++block_height;
+    //   size += bd.first.first.size();
+    //   res.output_indices.push_back(GET_BLOCKS_FAST_RPC::block_output_indices());
+    //   ntxes += bd.second.size();
+    //   res.output_indices.back().indices.reserve(1 + bd.second.size());
+    //   if (req.no_miner_tx)
+    //     res.output_indices.back().indices.push_back(GET_BLOCKS_FAST_RPC::tx_output_indices());
+    //   res.blocks.back().txs.reserve(bd.second.size());
+    //   for (std::vector<std::pair<crypto::hash, cryptonote::blobdata>>::iterator i = bd.second.begin(); i != bd.second.end(); ++i)
+    //   {
+    //     if(!cryptonote::parse_and_validate_tx_from_blob(i->second, tx))
+    //     {
+    //       std::cout << "value" << std::endl;
+    //       MERROR("Failed to parse block blob from tx pool when querying the missed transactions in block ");
+    //     }
+    //     std::cout<<"TRANSACTION:"<<obj_to_json_str(tx);
+    //     res.blocks.back().transactions = obj_to_json_str(tx);
+    //     res.blocks.back().txs.push_back({std::move(tools::type_to_hex(i->first)), crypto::null_hash});
+    //     i->second.clear();
+    //     i->second.shrink_to_fit();
+    //     size += res.blocks.back().txs.back().size();
+    //   }
+
+    //   const size_t n_txes_to_lookup = bd.second.size() + (req.no_miner_tx ? 0 : 1);
+    //   if (n_txes_to_lookup > 0)
+    //   {
+    //     std::vector<std::vector<uint64_t>> indices;
+    //     bool r = m_core.get_tx_outputs_gindexs(req.no_miner_tx ? bd.second.front().first : bd.first.second, n_txes_to_lookup, indices);
+    //     if (!r || indices.size() != n_txes_to_lookup || res.output_indices.back().indices.size() != (req.no_miner_tx ? 1 : 0))
+    //     {
+    //       res.status = "Failed";
+    //       return res;
+    //     }
+    //     for (size_t i = 0; i < indices.size(); ++i)
+    //       res.output_indices.back().indices.push_back({std::move(indices[i])});
+    //   }
+    // }
+
+  
+   auto it = bs.begin();
+
+    uint64_t block_count = 0;
+    while (it != bs.end())
     {
-      res.blocks.resize(res.blocks.size()+1);
-      res.blocks.back().block = bd.first.first;
-      if (!m_core.get_block_by_height(block_height, blk))
-        throw rpc_error{ERROR_INTERNAL, "Internal error: can't get block by height. Height = " + std::to_string(req.start_height) + '.'};
-      res.blocks.back().block_hash = tools::type_to_hex(get_block_hash(blk));
-      res.blocks.back().timestamp = blk.timestamp;
-      ++block_height;
-      size += bd.first.first.size();
-      res.output_indices.push_back(GET_BLOCKS_FAST_RPC::block_output_indices());
-      ntxes += bd.second.size();
-      res.output_indices.back().indices.reserve(1 + bd.second.size());
-      if (req.no_miner_tx)
-        res.output_indices.back().indices.push_back(GET_BLOCKS_FAST_RPC::tx_output_indices());
-      res.blocks.back().txs.reserve(bd.second.size());
-      for (std::vector<std::pair<crypto::hash, cryptonote::blobdata>>::iterator i = bd.second.begin(); i != bd.second.end(); ++i)
+      cryptonote::rpc::block_with_transactions& bwt = res.blocks[block_count];
+
+      if (!parse_and_validate_block_from_blob(it->first.first, bwt.block))
       {
-        res.blocks.back().txs.push_back({std::move(i->second), crypto::null_hash});
-        i->second.clear();
-        i->second.shrink_to_fit();
-        size += res.blocks.back().txs.back().size();
+        res.blocks.clear();
+        res.output_indices.clear();
+        res.status = STATUS_FAILED;
+        // res.error_details = "failed retrieving a requested block";
+        return;
+      }
+      std::cout<<"BLOCK:"<<obj_to_json_str(bwt.block);
+      if (it->second.size() != bwt.block.tx_hashes.size())
+      {
+          res.blocks.clear();
+          res.output_indices.clear();
+          res.status = STATUS_FAILED;
+          // res.error_details = "incorrect number of transactions retrieved for block";
+          return;
       }
 
-      const size_t n_txes_to_lookup = bd.second.size() + (req.no_miner_tx ? 0 : 1);
-      if (n_txes_to_lookup > 0)
+      cryptonote::rpc::block_output_indices& indices = res.output_indices[block_count];
+
+      // miner tx output indices
       {
-        std::vector<std::vector<uint64_t>> indices;
-        bool r = m_core.get_tx_outputs_gindexs(req.no_miner_tx ? bd.second.front().first : bd.first.second, n_txes_to_lookup, indices);
-        if (!r || indices.size() != n_txes_to_lookup || res.output_indices.back().indices.size() != (req.no_miner_tx ? 1 : 0))
+        cryptonote::rpc::tx_output_indices tx_indices;
+        if (!m_core.get_tx_outputs_gindexs(get_transaction_hash(bwt.block.miner_tx), tx_indices))
         {
-          res.status = "Failed";
-          return res;
+          res.status = STATUS_FAILED;
+          // res.error_details = "core::get_tx_outputs_gindexs() returned false";
+          return;
         }
-        for (size_t i = 0; i < indices.size(); ++i)
-          res.output_indices.back().indices.push_back({std::move(indices[i])});
+        indices.push_back(std::move(tx_indices));
       }
+
+      auto hash_it = bwt.block.tx_hashes.begin();
+      bwt.transactions.reserve(it->second.size());
+      for (const auto& blob : it->second)
+      {
+        bwt.transactions.emplace_back();
+        bwt.transactions.back().pruned = req.prune;
+
+        const bool parsed = req.prune ?
+          parse_and_validate_tx_base_from_blob(blob.second, bwt.transactions.back()) :
+          parse_and_validate_tx_from_blob(blob.second, bwt.transactions.back());
+        if (!parsed)
+        {
+          res.blocks.clear();
+          res.output_indices.clear();
+          res.status = STATUS_FAILED;
+          // res.error_details = "failed retrieving a requested transaction";
+          return;
+        }
+        std::cout<<"BLOCK:TRANSACTION:"<<obj_to_json_str(bwt.transactions);
+        cryptonote::rpc::tx_output_indices tx_indices;
+        if (!m_core.get_tx_outputs_gindexs(*hash_it, tx_indices))
+        {
+          res.status = STATUS_FAILED;
+          // res.error_details = "core::get_tx_outputs_gindexs() returned false";
+          return;
+        }
+     
+        indices.push_back(std::move(tx_indices));
+        ++hash_it;
+      }
+
+      it++;
+      block_count++;
     }
 
     MDEBUG("on_get_blocks: " << bs.size() << " blocks, " << ntxes << " txes, size " << size);

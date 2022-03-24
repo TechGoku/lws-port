@@ -146,9 +146,17 @@ namespace cryptonote
     std::string block;
     std::string block_hash;
     uint64_t timestamp;
+    std::string transactions;
     std::vector<std::string> txs;
     blobdata checkpoint;
     std::vector<serializable_flash_metadata> flashes;
+    KV_MAP_SERIALIZABLE
+  };
+
+  struct block_with_transactions
+  {
+    cryptonote::block block;
+    std::vector<cryptonote::transaction> transactions;
     KV_MAP_SERIALIZABLE
   };
   /************************************************************************/

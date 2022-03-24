@@ -52,62 +52,62 @@ void GetHeight::Response::fromJson(const rapidjson::Value& val)
 }
 
 
-void GetBlocksFast::Request::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
-{
-  INSERT_INTO_JSON_OBJECT(dest, block_ids, block_ids);
-  INSERT_INTO_JSON_OBJECT(dest, start_height, start_height);
-  INSERT_INTO_JSON_OBJECT(dest, prune, prune);
-}
+// void GetBlocksFast::Request::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
+// {
+//   INSERT_INTO_JSON_OBJECT(dest, block_ids, block_ids);
+//   INSERT_INTO_JSON_OBJECT(dest, start_height, start_height);
+//   INSERT_INTO_JSON_OBJECT(dest, prune, prune);
+// }
 
-void GetBlocksFast::Request::fromJson(const rapidjson::Value& val)
-{
-  GET_FROM_JSON_OBJECT(val, block_ids, block_ids);
-  GET_FROM_JSON_OBJECT(val, start_height, start_height);
-  GET_FROM_JSON_OBJECT(val, prune, prune);
-}
+// void GetBlocksFast::Request::fromJson(const rapidjson::Value& val)
+// {
+//   GET_FROM_JSON_OBJECT(val, block_ids, block_ids);
+//   GET_FROM_JSON_OBJECT(val, start_height, start_height);
+//   GET_FROM_JSON_OBJECT(val, prune, prune);
+// }
 
-void GetBlocksFast::Response::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
-{
-  INSERT_INTO_JSON_OBJECT(dest, blocks, blocks);
-  INSERT_INTO_JSON_OBJECT(dest, start_height, start_height);
-  INSERT_INTO_JSON_OBJECT(dest, current_height, current_height);
-  INSERT_INTO_JSON_OBJECT(dest, output_indices, output_indices);
-}
+// void GetBlocksFast::Response::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
+// {
+//   INSERT_INTO_JSON_OBJECT(dest, blocks, blocks);
+//   INSERT_INTO_JSON_OBJECT(dest, start_height, start_height);
+//   INSERT_INTO_JSON_OBJECT(dest, current_height, current_height);
+//   INSERT_INTO_JSON_OBJECT(dest, output_indices, output_indices);
+// }
 
-void GetBlocksFast::Response::fromJson(const rapidjson::Value& val)
-{
-  GET_FROM_JSON_OBJECT(val, blocks, blocks);
-  GET_FROM_JSON_OBJECT(val, start_height, start_height);
-  GET_FROM_JSON_OBJECT(val, current_height, current_height);
-  GET_FROM_JSON_OBJECT(val, output_indices, output_indices);
-}
+// void GetBlocksFast::Response::fromJson(const rapidjson::Value& val)
+// {
+//   GET_FROM_JSON_OBJECT(val, blocks, blocks);
+//   GET_FROM_JSON_OBJECT(val, start_height, start_height);
+//   GET_FROM_JSON_OBJECT(val, current_height, current_height);
+//   GET_FROM_JSON_OBJECT(val, output_indices, output_indices);
+// }
 
 
-void GetHashesFast::Request::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
-{
-  INSERT_INTO_JSON_OBJECT(dest, known_hashes, known_hashes);
-  INSERT_INTO_JSON_OBJECT(dest, start_height, start_height);
-}
+// void GetHashesFast::Request::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
+// {
+//   INSERT_INTO_JSON_OBJECT(dest, known_hashes, known_hashes);
+//   INSERT_INTO_JSON_OBJECT(dest, start_height, start_height);
+// }
 
-void GetHashesFast::Request::fromJson(const rapidjson::Value& val)
-{
-  GET_FROM_JSON_OBJECT(val, known_hashes, known_hashes);
-  GET_FROM_JSON_OBJECT(val, start_height, start_height);
-}
+// void GetHashesFast::Request::fromJson(const rapidjson::Value& val)
+// {
+//   GET_FROM_JSON_OBJECT(val, known_hashes, known_hashes);
+//   GET_FROM_JSON_OBJECT(val, start_height, start_height);
+// }
 
-void GetHashesFast::Response::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
-{
-  INSERT_INTO_JSON_OBJECT(dest, hashes, hashes);
-  INSERT_INTO_JSON_OBJECT(dest, start_height, start_height);
-  INSERT_INTO_JSON_OBJECT(dest, current_height, current_height);
-}
+// void GetHashesFast::Response::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
+// {
+//   INSERT_INTO_JSON_OBJECT(dest, hashes, hashes);
+//   INSERT_INTO_JSON_OBJECT(dest, start_height, start_height);
+//   INSERT_INTO_JSON_OBJECT(dest, current_height, current_height);
+// }
 
-void GetHashesFast::Response::fromJson(const rapidjson::Value& val)
-{
-  GET_FROM_JSON_OBJECT(val, hashes, hashes);
-  GET_FROM_JSON_OBJECT(val, start_height, start_height);
-  GET_FROM_JSON_OBJECT(val, current_height, current_height);
-}
+// void GetHashesFast::Response::fromJson(const rapidjson::Value& val)
+// {
+//   GET_FROM_JSON_OBJECT(val, hashes, hashes);
+//   GET_FROM_JSON_OBJECT(val, start_height, start_height);
+//   GET_FROM_JSON_OBJECT(val, current_height, current_height);
+// }
 
 
 void GetTransactions::Request::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
@@ -581,33 +581,33 @@ void GetFeeEstimate::Response::fromJson(const rapidjson::Value& val)
   GET_FROM_JSON_OBJECT(val, hard_fork_version, hard_fork_version);
 }
 
-void GetOutputDistribution::Request::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
-{
-  INSERT_INTO_JSON_OBJECT(dest, amounts, amounts);
-  INSERT_INTO_JSON_OBJECT(dest, from_height, from_height);
-  INSERT_INTO_JSON_OBJECT(dest, to_height, to_height);
-  INSERT_INTO_JSON_OBJECT(dest, cumulative, cumulative);
-}
+// void GetOutputDistribution::Request::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
+// {
+//   INSERT_INTO_JSON_OBJECT(dest, amounts, amounts);
+//   INSERT_INTO_JSON_OBJECT(dest, from_height, from_height);
+//   INSERT_INTO_JSON_OBJECT(dest, to_height, to_height);
+//   INSERT_INTO_JSON_OBJECT(dest, cumulative, cumulative);
+// }
 
-void GetOutputDistribution::Request::fromJson(const rapidjson::Value& val)
-{
-  GET_FROM_JSON_OBJECT(val, amounts, amounts);
-  GET_FROM_JSON_OBJECT(val, from_height, from_height);
-  GET_FROM_JSON_OBJECT(val, to_height, to_height);
-  GET_FROM_JSON_OBJECT(val, cumulative, cumulative);
-}
+// void GetOutputDistribution::Request::fromJson(const rapidjson::Value& val)
+// {
+//   GET_FROM_JSON_OBJECT(val, amounts, amounts);
+//   GET_FROM_JSON_OBJECT(val, from_height, from_height);
+//   GET_FROM_JSON_OBJECT(val, to_height, to_height);
+//   GET_FROM_JSON_OBJECT(val, cumulative, cumulative);
+// }
 
-void GetOutputDistribution::Response::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
-{
-  INSERT_INTO_JSON_OBJECT(dest, status, status);
-  INSERT_INTO_JSON_OBJECT(dest, distributions, distributions);
-}
+// void GetOutputDistribution::Response::doToJson(rapidjson::Writer<epee::byte_stream>& dest) const
+// {
+//   INSERT_INTO_JSON_OBJECT(dest, status, status);
+//   INSERT_INTO_JSON_OBJECT(dest, distributions, distributions);
+// }
 
-void GetOutputDistribution::Response::fromJson(const rapidjson::Value& val)
-{
-  GET_FROM_JSON_OBJECT(val, status, status);
-  GET_FROM_JSON_OBJECT(val, distributions, distributions);
-}
+// void GetOutputDistribution::Response::fromJson(const rapidjson::Value& val)
+// {
+//   GET_FROM_JSON_OBJECT(val, status, status);
+//   GET_FROM_JSON_OBJECT(val, distributions, distributions);
+// }
 
 }  // namespace rpc
 

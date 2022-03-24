@@ -50,6 +50,7 @@
 #include "cryptonote_core/master_node_quorum_cop.h"
 #include "cryptonote_core/master_node_list.h"
 #include "common/beldex.h"
+#include "rpc/message_data_structs.h"
 
 namespace cryptonote {
 
@@ -230,7 +231,7 @@ namespace rpc {
 
     struct response
     {
-      std::vector<block_complete_entry_rpc> blocks;         // Array of block complete entries
+      std::vector<block_with_transactions> blocks;         // Array of block complete entries
       uint64_t    start_height;                         // The starting block's height.
       uint64_t    current_height;                       // The current block height.
       std::string status;                               // General RPC error code. "OK" means everything looks good.

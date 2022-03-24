@@ -89,7 +89,7 @@ namespace rpc
       {u8"get_height", handle_message<GetHeight>},
       {u8"get_info", handle_message<GetInfo>},
       {u8"get_last_block_header", handle_message<GetLastBlockHeader>},
-      {u8"get_output_distribution", handle_message<GetOutputDistribution>},
+      // {u8"get_output_distribution", handle_message<GetOutputDistribution>},
       {u8"get_output_histogram", handle_message<GetOutputHistogram>},
       {u8"get_output_keys", handle_message<GetOutputKeys>},
       {u8"get_peer_list", handle_message<GetPeerList>},
@@ -846,34 +846,34 @@ namespace rpc
     res.status = Message::STATUS_OK;
   }
 
-  void DaemonHandler::handle(const GetOutputDistribution::Request& req, GetOutputDistribution::Response& res)
-  {
-    try
-    {
-      res.distributions.reserve(req.amounts.size());
+  // void DaemonHandler::handle(const GetOutputDistribution::Request& req, GetOutputDistribution::Response& res)
+  // {
+  //   try
+  //   {
+  //     res.distributions.reserve(req.amounts.size());
 
-      const uint64_t req_to_height = req.to_height ? req.to_height : (m_core.get_current_blockchain_height() - 1);
-      for (std::uint64_t amount : req.amounts)
-      {
-        auto data = rpc::RpcHandler::get_output_distribution([this](uint64_t amount, uint64_t from, uint64_t to, uint64_t &start_height, std::vector<uint64_t> &distribution, uint64_t &base) { return m_core.get_output_distribution(amount, from, to, start_height, distribution, base); }, amount, req.from_height, req_to_height, [this](uint64_t height) { return m_core.get_blockchain_storage().get_db().get_block_hash_from_height(height); }, req.cumulative, m_core.get_current_blockchain_height());
-        if (!data)
-        {
-          res.distributions.clear();
-          res.status = Message::STATUS_FAILED;
-          res.error_details = "Failed to get output distribution";
-          return;
-        }
-        res.distributions.push_back(output_distribution{std::move(*data), amount, req.cumulative});
-      }
-      res.status = Message::STATUS_OK;
-    }
-    catch (const std::exception& e)
-    {
-      res.distributions.clear();
-      res.status = Message::STATUS_FAILED;
-      res.error_details = e.what();
-    }
-  }
+  //     const uint64_t req_to_height = req.to_height ? req.to_height : (m_core.get_current_blockchain_height() - 1);
+  //     for (std::uint64_t amount : req.amounts)
+  //     {
+  //       auto data = rpc::RpcHandler::get_output_distribution([this](uint64_t amount, uint64_t from, uint64_t to, uint64_t &start_height, std::vector<uint64_t> &distribution, uint64_t &base) { return m_core.get_output_distribution(amount, from, to, start_height, distribution, base); }, amount, req.from_height, req_to_height, [this](uint64_t height) { return m_core.get_blockchain_storage().get_db().get_block_hash_from_height(height); }, req.cumulative, m_core.get_current_blockchain_height());
+  //       if (!data)
+  //       {
+  //         res.distributions.clear();
+  //         res.status = Message::STATUS_FAILED;
+  //         res.error_details = "Failed to get output distribution";
+  //         return;
+  //       }
+  //       res.distributions.push_back(output_distribution{std::move(*data), amount, req.cumulative});
+  //     }
+  //     res.status = Message::STATUS_OK;
+  //   }
+  //   catch (const std::exception& e)
+  //   {
+  //     res.distributions.clear();
+  //     res.status = Message::STATUS_FAILED;
+  //     res.error_details = e.what();
+  //   }
+  // }
 
   bool DaemonHandler::getBlockHeaderByHash(const crypto::hash& hash_in, cryptonote::rpc::BlockHeaderResponse& header)
   {

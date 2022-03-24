@@ -23,7 +23,7 @@
 #include "wallet/wallet2.h"                             // beldex/src
 #include "epee/span.h"                                  // beldex/src
 #include "epee/misc_log_ex.h"                           // beldex/src
-
+#include "wire/json/base.h"
 #include "error.h"
 #include "scanner.h"
 #include "db/account.h"
@@ -309,7 +309,7 @@ namespace lws
           [](ConnectionID conn, std::string_view f) { std::cout << "connect failed: \n";} 
           ); 
 
-          m_LMQ->request(c, "rpc.get_blocks_fast", [](bool s, auto data) {
+          m_LMQ->request(c, "rpc.get_blocks", [](bool s, auto data) {
           if (s == 1 && data[0] == "200"){
               std::cout << "get_blocks data : " << data[1] << "\n";
               std::cout << "called" << std::endl;
@@ -330,7 +330,7 @@ namespace lws
       //       MONERO_THROW(resp.error(), "Failed to retrieve blocks from daemon");
       //     }
 
-      //     auto fetched = MONERO_UNWRAP(wire::json::from_bytes<rpc::json<rpc::get_blocks_fast>::response>(std::move(*resp)));
+          // auto fetched = MONERO_UNWRAP(wire::json::from_bytes<rpc::json<rpc::get_blocks_fast>::response>(std::move(*resp)));
       //     if (fetched.result.blocks.empty())
       //       throw std::runtime_error{"Daemon unexpectedly returned zero blocks"};
 

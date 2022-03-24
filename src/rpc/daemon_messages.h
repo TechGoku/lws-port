@@ -87,19 +87,19 @@ BEGIN_RPC_MESSAGE_CLASS(GetHeight);
 END_RPC_MESSAGE_CLASS;
 
 
-BEGIN_RPC_MESSAGE_CLASS(GetBlocksFast);
-  BEGIN_RPC_MESSAGE_REQUEST;
-    RPC_MESSAGE_MEMBER(std::list<crypto::hash>, block_ids);
-    RPC_MESSAGE_MEMBER(uint64_t, start_height);
-    RPC_MESSAGE_MEMBER(bool, prune);
-  END_RPC_MESSAGE_REQUEST;
-  BEGIN_RPC_MESSAGE_RESPONSE;
-    RPC_MESSAGE_MEMBER(std::vector<cryptonote::rpc::block_with_transactions>, blocks);
-    RPC_MESSAGE_MEMBER(uint64_t, start_height);
-    RPC_MESSAGE_MEMBER(uint64_t, current_height);
-    RPC_MESSAGE_MEMBER(std::vector<cryptonote::rpc::block_output_indices>, output_indices);
-  END_RPC_MESSAGE_RESPONSE;
-END_RPC_MESSAGE_CLASS;
+// BEGIN_RPC_MESSAGE_CLASS(GetBlocksFast);
+//   BEGIN_RPC_MESSAGE_REQUEST;
+//     RPC_MESSAGE_MEMBER(std::list<crypto::hash>, block_ids);
+//     RPC_MESSAGE_MEMBER(uint64_t, start_height);
+//     RPC_MESSAGE_MEMBER(bool, prune);
+//   END_RPC_MESSAGE_REQUEST;
+//   BEGIN_RPC_MESSAGE_RESPONSE;
+//     RPC_MESSAGE_MEMBER(std::vector<cryptonote::rpc::block_with_transactions>, blocks);
+//     RPC_MESSAGE_MEMBER(uint64_t, start_height);
+//     RPC_MESSAGE_MEMBER(uint64_t, current_height);
+//     RPC_MESSAGE_MEMBER(std::vector<cryptonote::rpc::block_output_indices>, output_indices);
+//   END_RPC_MESSAGE_RESPONSE;
+// END_RPC_MESSAGE_CLASS;
 
 
 BEGIN_RPC_MESSAGE_CLASS(GetHashesFast);
@@ -430,17 +430,17 @@ BEGIN_RPC_MESSAGE_CLASS(GetFeeEstimate);
   END_RPC_MESSAGE_RESPONSE;
 END_RPC_MESSAGE_CLASS;
 
-BEGIN_RPC_MESSAGE_CLASS(GetOutputDistribution);
-  BEGIN_RPC_MESSAGE_REQUEST;
-    RPC_MESSAGE_MEMBER(std::vector<uint64_t>, amounts);
-    RPC_MESSAGE_MEMBER(uint64_t, from_height);
-    RPC_MESSAGE_MEMBER(uint64_t, to_height);
-    RPC_MESSAGE_MEMBER(bool, cumulative);
-  END_RPC_MESSAGE_REQUEST;
-  BEGIN_RPC_MESSAGE_RESPONSE;
-    RPC_MESSAGE_MEMBER(std::vector<output_distribution>, distributions);
-  END_RPC_MESSAGE_RESPONSE;
-END_RPC_MESSAGE_CLASS;
+// BEGIN_RPC_MESSAGE_CLASS(GetOutputDistribution);
+//   BEGIN_RPC_MESSAGE_REQUEST;
+//     RPC_MESSAGE_MEMBER(std::vector<uint64_t>, amounts);
+//     RPC_MESSAGE_MEMBER(uint64_t, from_height);
+//     RPC_MESSAGE_MEMBER(uint64_t, to_height);
+//     RPC_MESSAGE_MEMBER(bool, cumulative);
+//   END_RPC_MESSAGE_REQUEST;
+//   BEGIN_RPC_MESSAGE_RESPONSE;
+//     RPC_MESSAGE_MEMBER(std::vector<output_distribution>, distributions);
+//   END_RPC_MESSAGE_RESPONSE;
+// END_RPC_MESSAGE_CLASS;
 
 }  // namespace rpc
 
