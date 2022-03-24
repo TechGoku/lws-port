@@ -94,6 +94,15 @@ namespace
     write_json_addresses(out, address);
   }
 
+  // void debug_database(program prog, std::ostream& out)
+  // {
+  //   if (!prog.arguments.empty())
+  //     throw std::runtime_error{"debug_database takes zero arguments"};
+
+  //   auto reader = prog.disk.start_read().value();
+  //   reader.json_debug(out, prog.show_sensitive);
+  // }
+
   struct command
   {
     char const* const name;

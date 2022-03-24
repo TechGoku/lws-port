@@ -3,6 +3,7 @@ include_directories(.)
 message( "--------- INSIDE THE LWS ------")
 
 add_subdirectory(db)
+# add_subdirectory(rpc)
 add_subdirectory(util)
 add_subdirectory(wire)
 find_package(nlohmann_json 3.7.0 REQUIRED)
@@ -18,6 +19,7 @@ add_executable(beldex-lws-daemon server_main.cpp scanner.cpp)
 
 target_link_libraries(beldex-lws-daemon PUBLIC
     beldex-lws-db
+    # beldex-lws-rpc
     beldex-lws-common
     beldex-lws-util
     beldex-lws-wire-json
@@ -37,6 +39,7 @@ target_link_libraries(beldex-lws-admin PRIVATE
 beldex-lws-db
 beldex-lws-common
 # beldex-lws-util
+# beldex-lws-wire
 beldex-lws-wire-json
 )
 
