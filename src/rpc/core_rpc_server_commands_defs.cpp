@@ -68,12 +68,21 @@ KV_SERIALIZE_MAP_CODE_END()
 
 KV_SERIALIZE_MAP_CODE_BEGIN(GET_BLOCKS_FAST_RPC::response)
   KV_SERIALIZE(blocks)
+  // KV_SERIALIZE(blocks_rpc)
   KV_SERIALIZE(start_height)
   KV_SERIALIZE(current_height)
   KV_SERIALIZE(status)
   KV_SERIALIZE(output_indices)
-  KV_SERIALIZE(untrusted)
+  // KV_SERIALIZE(untrusted)
 KV_SERIALIZE_MAP_CODE_END()
+
+// KV_SERIALIZE_MAP_CODE_BEGIN(GET_BLOCKS_FAST_RPC::responseData)
+//   KV_SERIALIZE(blocks)
+//   KV_SERIALIZE(start_height)
+//   KV_SERIALIZE(current_height)
+//   KV_SERIALIZE(status)
+//   KV_SERIALIZE(output_indices)
+// KV_SERIALIZE_MAP_CODE_END()
 
 
 KV_SERIALIZE_MAP_CODE_BEGIN(GET_BLOCKS_BY_HEIGHT::request)

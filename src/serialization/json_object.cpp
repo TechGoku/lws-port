@@ -745,26 +745,26 @@ void fromJsonValue(const rapidjson::Value& val, cryptonote::block_complete_entry
   GET_FROM_JSON_OBJECT(val, blk.txs, transactions);
 }
 
-void toJsonValue(rapidjson::Writer<epee::byte_stream>& dest, const cryptonote::rpc::block_with_transactions& blk)
-{
-  dest.StartObject();
+// void toJsonValue(rapidjson::Writer<epee::byte_stream>& dest, const cryptonote::rpc::block_with_transactions& blk)
+// {
+//   dest.StartObject();
 
-  INSERT_INTO_JSON_OBJECT(dest, block, blk.block);
-  INSERT_INTO_JSON_OBJECT(dest, transactions, blk.transactions);
+//   INSERT_INTO_JSON_OBJECT(dest, block, blk.block);
+//   INSERT_INTO_JSON_OBJECT(dest, transactions, blk.transactions);
 
-  dest.EndObject();
-}
+//   dest.EndObject();
+// }
 
 
-void fromJsonValue(const rapidjson::Value& val, cryptonote::rpc::block_with_transactions& blk)
-{
-  if (!val.IsObject())
-  {
-    throw WRONG_TYPE("json object");
-  }
+// void fromJsonValue(const rapidjson::Value& val, cryptonote::rpc::block_with_transactions& blk)
+// {
+//   if (!val.IsObject())
+//   {
+//     throw WRONG_TYPE("json object");
+//   }
 
-  GET_FROM_JSON_OBJECT(val, blk.block, block);
-  GET_FROM_JSON_OBJECT(val, blk.transactions, transactions);
+//   GET_FROM_JSON_OBJECT(val, blk.block, block);
+//   GET_FROM_JSON_OBJECT(val, blk.transactions, transactions);
 }
 
 void toJsonValue(rapidjson::Writer<epee::byte_stream>& dest, const cryptonote::rpc::transaction_info& tx_info)

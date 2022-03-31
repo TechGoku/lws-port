@@ -81,5 +81,6 @@
         "filesystem": "cpp",
         "ranges": "cpp",
         "cassert": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

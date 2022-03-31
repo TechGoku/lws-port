@@ -64,6 +64,11 @@ KV_SERIALIZE_MAP_CODE_BEGIN(block_complete_entry_rpc)
   KV_SERIALIZE(flashes)
 KV_SERIALIZE_MAP_CODE_END()
 
+// KV_SERIALIZE_MAP_CODE_BEGIN(block_with_transactions_rpc)
+//   KV_SERIALIZE(block)
+//   KV_SERIALIZE(transactions)
+// KV_SERIALIZE_MAP_CODE_END()
+
 KV_SERIALIZE_MAP_CODE_BEGIN(NOTIFY_NEW_TRANSACTIONS::request)
   KV_SERIALIZE(txs)
   KV_SERIALIZE(flashes)

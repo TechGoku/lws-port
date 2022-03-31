@@ -57,7 +57,7 @@ class DaemonHandler : public RpcHandler
 
     void handle(const GetHeight::Request& req, GetHeight::Response& res);
 
-    void handle(const GetBlocksFast::Request& req, GetBlocksFast::Response& res);
+    // void handle(const GetBlocksFast::Request& req, GetBlocksFast::Response& res);
 
     void handle(const GetHashesFast::Request& req, GetHashesFast::Response& res);
 
@@ -131,7 +131,7 @@ class DaemonHandler : public RpcHandler
 
     void handle(const GetFeeEstimate::Request& req, GetFeeEstimate::Response& res);
 
-    void handle(const GetOutputDistribution::Request& req, GetOutputDistribution::Response& res);
+    // void handle(const GetOutputDistribution::Request& req, GetOutputDistribution::Response& res);
 
     epee::byte_slice handle(std::string&& request) override final;
 

@@ -154,6 +154,45 @@ namespace cryptonote
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
+
+ struct quorum_signature_rpc
+  {
+    uint16_t voter_index;
+    char padding[6] = {0};
+    crypto::signature signature;
+  };
+  struct transaction_rpc
+  {   
+   size_t   version;
+   uint64_t unlock_time;
+  //  std::vector<uint64_t> output_unlock_times;  // comes in beldex
+   std::vector<txin_v> vin;
+   std::vector<tx_out> vout;
+   std::vector<uint8_t> extra;
+   txtype type;
+   rct::rctSig rct_signatures;
+  };
+  struct block_rpc
+  {
+    uint8_t major_version = cryptonote::network_version_7;
+    uint8_t minor_version = cryptonote::network_version_7;  // now used as a voting mechanism, rather than how this particular block is built
+    uint64_t timestamp;
+    crypto::hash  prev_id;
+    uint32_t nonce;
+    POS_header POS = {};
+    transaction_rpc miner_tx;
+    std::vector<crypto::hash> tx_hashes;
+    std::vector<quorum_signature_rpc> signatures;
+  };
+   struct block_with_transactions_rpc
+  {
+    cryptonote::block block;
+    std::vector<cryptonote::transaction> transactions;
+    KV_MAP_SERIALIZABLE
+  };
+  /************************************************************************/
+  /*                                                                      */
+  /************************************************************************/
   struct NOTIFY_NEW_TRANSACTIONS
   {
     const static int ID = BC_COMMANDS_POOL_BASE + 2;

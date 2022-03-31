@@ -549,10 +549,10 @@ namespace cryptonote { namespace rpc {
   }
 
   //------------------------------------------------------------------------------------------------------------------------------
-  GET_BLOCKS_FAST_RPC::response core_rpc_server::invoke(GET_BLOCKS_FAST_RPC::request&& req, rpc_context context)
+    GET_BLOCKS_FAST_RPC::response core_rpc_server::invoke(GET_BLOCKS_FAST_RPC::request&& req, rpc_context context)
   {
     GET_BLOCKS_FAST_RPC::response res{};
-
+    GET_BLOCKS_FAST_RPC::responseData resData{};
     PERF_TIMER(on_get_blocks);
     if (use_bootstrap_daemon_if_necessary<GET_BLOCKS_FAST_RPC>(req, res))
       return res;
@@ -564,10 +564,82 @@ namespace cryptonote { namespace rpc {
       res.status = "Failed";
       return res;
     }
+    std::cout<<"ENTER::";
+    res.blocks.reserve(bs.size());
+    resData.blocks.reserve(bs.size());
+    resData.output_indices.output_indices.reserve(bs.size());
+    res.output_indices.reserve(bs.size());
+    auto it = bs.begin();
+    uint64_t block_count = 0;
+    while (it != bs.end())
+    {
+     std::cout<<"loop";
+       cryptonote::block_with_transactions_rpc& bwt = resData.blocks[block_count];
+      if (!parse_and_validate_block_from_blob(it->first.first, bwt.block))
+       {
+        std::cout<<"loop";
+        resData.blocks.clear();
+        resData.output_indices.output_indices.clear();
+        resData.status =STATUS_FAILED;
+        return res;
+      }
+      std::cout<<"BWT:BLOCK::FIN"<<obj_to_json_str(bwt.block);
+        if (it->second.size() != bwt.block.tx_hashes.size())
+      {
+          resData.blocks.clear();
+          resData.output_indices.output_indices.clear();
+          resData.status = STATUS_FAILED;
+          return res;
+      }
+      cryptonote::block_output_indices& indices = resData.output_indices.output_indices[block_count];
+      {
+        cryptonote::tx_output_indices tx_indices;
+        if (!m_core.get_tx_outputs_gindexs(get_transaction_hash(bwt.block.miner_tx), tx_indices))
+        {
+          resData.status = STATUS_FAILED;
+          return res;
+        }
+        indices.push_back(std::move(tx_indices));
+      }
+      std::cout<<"completed";
+      auto hash_it = bwt.block.tx_hashes.begin();
+      // std::cout<<"HAST:"<<*hash_it;
+      bwt.transactions.reserve(it->second.size());
+      for (const auto& blob : it->second)
+      {
+        bwt.transactions.emplace_back();
+        bwt.transactions.back().pruned = req.prune;
+
+        const bool parsed = req.prune ?
+          parse_and_validate_tx_base_from_blob(blob.second, bwt.transactions.back()) :
+          parse_and_validate_tx_from_blob(blob.second, bwt.transactions.back());
+        if (!parsed)
+        {
+          resData.blocks.clear();
+          resData.output_indices.output_indices.clear();
+          resData.status =STATUS_FAILED;
+          return res;
+        }
+        cryptonote::tx_output_indices tx_indices;
+        if (!m_core.get_tx_outputs_gindexs(*hash_it, tx_indices))
+        {
+          resData.status = STATUS_FAILED;
+          return res;
+        }
+     
+        indices.push_back(std::move(tx_indices));
+        // ++hash_it;
+      }
+      std::cout<<"BWT:BLOCK::FIN"<<obj_to_json_str(bwt.block);
+      std::cout<<"BWT:TRANSACTIONS:FIN"<<obj_to_json_str(bwt.transactions);
+        
+      it++;
+      block_count++;
+      break;
+    }
+    std::cout<<"HELLO";
 
     size_t size = 0, ntxes = 0;
-    res.blocks.reserve(bs.size());
-    res.output_indices.reserve(bs.size());
     block blk;
     int block_height = req.start_height;
     for(auto& bd: bs)
@@ -593,7 +665,7 @@ namespace cryptonote { namespace rpc {
         i->second.shrink_to_fit();
         size += res.blocks.back().txs.back().size();
       }
-
+      // std::cout<<"HELLO1";
       const size_t n_txes_to_lookup = bd.second.size() + (req.no_miner_tx ? 0 : 1);
       if (n_txes_to_lookup > 0)
       {

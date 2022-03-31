@@ -83,13 +83,13 @@ namespace rpc
       {u8"get_block_header_by_hash", handle_message<GetBlockHeaderByHash>},
       {u8"get_block_header_by_height", handle_message<GetBlockHeaderByHeight>},
       {u8"get_block_headers_by_height", handle_message<GetBlockHeadersByHeight>},
-      {u8"get_blocks_fast", handle_message<GetBlocksFast>},
+      // {u8"get_blocks_fast", handle_message<GetBlocksFast>},
       {u8"get_dynamic_fee_estimate", handle_message<GetFeeEstimate>},
       {u8"get_hashes_fast", handle_message<GetHashesFast>},
       {u8"get_height", handle_message<GetHeight>},
       {u8"get_info", handle_message<GetInfo>},
       {u8"get_last_block_header", handle_message<GetLastBlockHeader>},
-      {u8"get_output_distribution", handle_message<GetOutputDistribution>},
+      // {u8"get_output_distribution", handle_message<GetOutputDistribution>},
       {u8"get_output_histogram", handle_message<GetOutputHistogram>},
       {u8"get_output_keys", handle_message<GetOutputKeys>},
       {u8"get_peer_list", handle_message<GetPeerList>},
@@ -124,96 +124,96 @@ namespace rpc
     res.status = Message::STATUS_OK;
   }
 
-  void DaemonHandler::handle(const GetBlocksFast::Request& req, GetBlocksFast::Response& res)
-  {
-    std::vector<std::pair<std::pair<blobdata, crypto::hash>, std::vector<std::pair<crypto::hash, blobdata> > > > blocks;
+  // void DaemonHandler::handle(const GetBlocksFast::Request& req, GetBlocksFast::Response& res)
+  // {
+  //   std::vector<std::pair<std::pair<blobdata, crypto::hash>, std::vector<std::pair<crypto::hash, blobdata> > > > blocks;
 
-    if(!m_core.find_blockchain_supplement(req.start_height, req.block_ids, blocks, res.current_height, res.start_height, req.prune, true, COMMAND_RPC_GET_BLOCKS_FAST_MAX_BLOCK_COUNT, COMMAND_RPC_GET_BLOCKS_FAST_MAX_TX_COUNT))
-    {
-      res.status = Message::STATUS_FAILED;
-      res.error_details = "core::find_blockchain_supplement() returned false";
-      return;
-    }
+  //   if(!m_core.find_blockchain_supplement(req.start_height, req.block_ids, blocks, res.current_height, res.start_height, req.prune, true, COMMAND_RPC_GET_BLOCKS_FAST_MAX_BLOCK_COUNT, COMMAND_RPC_GET_BLOCKS_FAST_MAX_TX_COUNT))
+  //   {
+  //     res.status = Message::STATUS_FAILED;
+  //     res.error_details = "core::find_blockchain_supplement() returned false";
+  //     return;
+  //   }
 
-    res.blocks.resize(blocks.size());
-    res.output_indices.resize(blocks.size());
+  //   res.blocks.resize(blocks.size());
+  //   res.output_indices.resize(blocks.size());
 
-    auto it = blocks.begin();
+  //   auto it = blocks.begin();
 
-    uint64_t block_count = 0;
-    while (it != blocks.end())
-    {
-      cryptonote::rpc::block_with_transactions& bwt = res.blocks[block_count];
+  //   uint64_t block_count = 0;
+  //   while (it != blocks.end())
+  //   {
+  //     cryptonote::rpc::block_with_transactions& bwt = res.blocks[block_count];
 
-      if (!parse_and_validate_block_from_blob(it->first.first, bwt.block))
-      {
-        res.blocks.clear();
-        res.output_indices.clear();
-        res.status = Message::STATUS_FAILED;
-        res.error_details = "failed retrieving a requested block";
-        return;
-      }
+  //     if (!parse_and_validate_block_from_blob(it->first.first, bwt.block))
+  //     {
+  //       res.blocks.clear();
+  //       res.output_indices.clear();
+  //       res.status = Message::STATUS_FAILED;
+  //       res.error_details = "failed retrieving a requested block";
+  //       return;
+  //     }
 
-      if (it->second.size() != bwt.block.tx_hashes.size())
-      {
-          res.blocks.clear();
-          res.output_indices.clear();
-          res.status = Message::STATUS_FAILED;
-          res.error_details = "incorrect number of transactions retrieved for block";
-          return;
-      }
+  //     if (it->second.size() != bwt.block.tx_hashes.size())
+  //     {
+  //         res.blocks.clear();
+  //         res.output_indices.clear();
+  //         res.status = Message::STATUS_FAILED;
+  //         res.error_details = "incorrect number of transactions retrieved for block";
+  //         return;
+  //     }
 
-      cryptonote::rpc::block_output_indices& indices = res.output_indices[block_count];
+  //     cryptonote::rpc::block_output_indices& indices = res.output_indices[block_count];
 
-      // miner tx output indices
-      {
-        cryptonote::rpc::tx_output_indices tx_indices;
-        if (!m_core.get_tx_outputs_gindexs(get_transaction_hash(bwt.block.miner_tx), tx_indices))
-        {
-          res.status = Message::STATUS_FAILED;
-          res.error_details = "core::get_tx_outputs_gindexs() returned false";
-          return;
-        }
-        indices.push_back(std::move(tx_indices));
-      }
+  //     // miner tx output indices
+  //     {
+  //       cryptonote::rpc::tx_output_indices tx_indices;
+  //       if (!m_core.get_tx_outputs_gindexs(get_transaction_hash(bwt.block.miner_tx), tx_indices))
+  //       {
+  //         res.status = Message::STATUS_FAILED;
+  //         res.error_details = "core::get_tx_outputs_gindexs() returned false";
+  //         return;
+  //       }
+  //       indices.push_back(std::move(tx_indices));
+  //     }
 
-      auto hash_it = bwt.block.tx_hashes.begin();
-      bwt.transactions.reserve(it->second.size());
-      for (const auto& blob : it->second)
-      {
-        bwt.transactions.emplace_back();
-        bwt.transactions.back().pruned = req.prune;
+  //     auto hash_it = bwt.block.tx_hashes.begin();
+  //     bwt.transactions.reserve(it->second.size());
+  //     for (const auto& blob : it->second)
+  //     {
+  //       bwt.transactions.emplace_back();
+  //       bwt.transactions.back().pruned = req.prune;
 
-        const bool parsed = req.prune ?
-          parse_and_validate_tx_base_from_blob(blob.second, bwt.transactions.back()) :
-          parse_and_validate_tx_from_blob(blob.second, bwt.transactions.back());
-        if (!parsed)
-        {
-          res.blocks.clear();
-          res.output_indices.clear();
-          res.status = Message::STATUS_FAILED;
-          res.error_details = "failed retrieving a requested transaction";
-          return;
-        }
+  //       const bool parsed = req.prune ?
+  //         parse_and_validate_tx_base_from_blob(blob.second, bwt.transactions.back()) :
+  //         parse_and_validate_tx_from_blob(blob.second, bwt.transactions.back());
+  //       if (!parsed)
+  //       {
+  //         res.blocks.clear();
+  //         res.output_indices.clear();
+  //         res.status = Message::STATUS_FAILED;
+  //         res.error_details = "failed retrieving a requested transaction";
+  //         return;
+  //       }
 
-        cryptonote::rpc::tx_output_indices tx_indices;
-        if (!m_core.get_tx_outputs_gindexs(*hash_it, tx_indices))
-        {
-          res.status = Message::STATUS_FAILED;
-          res.error_details = "core::get_tx_outputs_gindexs() returned false";
-          return;
-        }
+  //       cryptonote::rpc::tx_output_indices tx_indices;
+  //       if (!m_core.get_tx_outputs_gindexs(*hash_it, tx_indices))
+  //       {
+  //         res.status = Message::STATUS_FAILED;
+  //         res.error_details = "core::get_tx_outputs_gindexs() returned false";
+  //         return;
+  //       }
 
-        indices.push_back(std::move(tx_indices));
-        ++hash_it;
-      }
+  //       indices.push_back(std::move(tx_indices));
+  //       ++hash_it;
+  //     }
 
-      it++;
-      block_count++;
-    }
+  //     it++;
+  //     block_count++;
+  //   }
 
-    res.status = Message::STATUS_OK;
-  }
+  //   res.status = Message::STATUS_OK;
+  // }
 
   void DaemonHandler::handle(const GetHashesFast::Request& req, GetHashesFast::Response& res)
   {
@@ -846,34 +846,34 @@ namespace rpc
     res.status = Message::STATUS_OK;
   }
 
-  void DaemonHandler::handle(const GetOutputDistribution::Request& req, GetOutputDistribution::Response& res)
-  {
-    try
-    {
-      res.distributions.reserve(req.amounts.size());
+  // void DaemonHandler::handle(const GetOutputDistribution::Request& req, GetOutputDistribution::Response& res)
+  // {
+  //   try
+  //   {
+  //     res.distributions.reserve(req.amounts.size());
 
-      const uint64_t req_to_height = req.to_height ? req.to_height : (m_core.get_current_blockchain_height() - 1);
-      for (std::uint64_t amount : req.amounts)
-      {
-        auto data = rpc::RpcHandler::get_output_distribution([this](uint64_t amount, uint64_t from, uint64_t to, uint64_t &start_height, std::vector<uint64_t> &distribution, uint64_t &base) { return m_core.get_output_distribution(amount, from, to, start_height, distribution, base); }, amount, req.from_height, req_to_height, [this](uint64_t height) { return m_core.get_blockchain_storage().get_db().get_block_hash_from_height(height); }, req.cumulative, m_core.get_current_blockchain_height());
-        if (!data)
-        {
-          res.distributions.clear();
-          res.status = Message::STATUS_FAILED;
-          res.error_details = "Failed to get output distribution";
-          return;
-        }
-        res.distributions.push_back(output_distribution{std::move(*data), amount, req.cumulative});
-      }
-      res.status = Message::STATUS_OK;
-    }
-    catch (const std::exception& e)
-    {
-      res.distributions.clear();
-      res.status = Message::STATUS_FAILED;
-      res.error_details = e.what();
-    }
-  }
+  //     const uint64_t req_to_height = req.to_height ? req.to_height : (m_core.get_current_blockchain_height() - 1);
+  //     for (std::uint64_t amount : req.amounts)
+  //     {
+  //       auto data = rpc::RpcHandler::get_output_distribution([this](uint64_t amount, uint64_t from, uint64_t to, uint64_t &start_height, std::vector<uint64_t> &distribution, uint64_t &base) { return m_core.get_output_distribution(amount, from, to, start_height, distribution, base); }, amount, req.from_height, req_to_height, [this](uint64_t height) { return m_core.get_blockchain_storage().get_db().get_block_hash_from_height(height); }, req.cumulative, m_core.get_current_blockchain_height());
+  //       if (!data)
+  //       {
+  //         res.distributions.clear();
+  //         res.status = Message::STATUS_FAILED;
+  //         res.error_details = "Failed to get output distribution";
+  //         return;
+  //       }
+  //       res.distributions.push_back(output_distribution{std::move(*data), amount, req.cumulative});
+  //     }
+  //     res.status = Message::STATUS_OK;
+  //   }
+  //   catch (const std::exception& e)
+  //   {
+  //     res.distributions.clear();
+  //     res.status = Message::STATUS_FAILED;
+  //     res.error_details = e.what();
+  //   }
+  // }
 
   bool DaemonHandler::getBlockHeaderByHash(const crypto::hash& hash_in, cryptonote::rpc::BlockHeaderResponse& header)
   {

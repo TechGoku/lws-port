@@ -480,6 +480,17 @@ namespace cryptonote
   };
   inline constexpr account_public_address null_address{};
 
+  // struct block_with_transactions_rpc
+  // {
+  //   cryptonote::block block;
+  //   std::vector<cryptonote::transaction> transactions;
+  //   // KV_MAP_SERIALIZABLE
+  // };
+  
+  typedef std::vector<uint64_t> tx_output_indices;
+
+  typedef std::vector<tx_output_indices> block_output_indices;
+
   struct keypair
   {
     crypto::public_key pub;

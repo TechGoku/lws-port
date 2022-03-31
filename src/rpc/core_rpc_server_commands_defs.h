@@ -50,6 +50,8 @@
 #include "cryptonote_core/master_node_quorum_cop.h"
 #include "cryptonote_core/master_node_list.h"
 #include "common/beldex.h"
+#include "rpc/message_data_structs.h"
+
 
 namespace cryptonote {
 
@@ -227,17 +229,30 @@ namespace rpc {
 
       KV_MAP_SERIALIZABLE
     };
+    struct block_output_indices_rpc{
+      std::vector<cryptonote::block_output_indices> output_indices;
+      KV_MAP_SERIALIZABLE
+    };
 
     struct response
     {
       std::vector<block_complete_entry_rpc> blocks;         // Array of block complete entries
       uint64_t    start_height;                         // The starting block's height.
       uint64_t    current_height;                       // The current block height.
-      std::string status;                               // General RPC error code. "OK" means everything looks good.
+      std::string status;                               // Gener  al RPC error code. "OK" means everything looks good.
       std::vector<block_output_indices> output_indices; // Array of indices.
-      bool untrusted;                                   // States if the result is obtained using the bootstrap mode, and is therefore not trusted (`true`), or when the daemon is fully synced (`false`).
-
-      KV_MAP_SERIALIZABLE
+      bool untrusted;                                   
+     KV_MAP_SERIALIZABLE
+    };
+    // obj_block_output_indices_rpc;
+    struct responseData
+    {
+     std::vector<cryptonote::block_with_transactions_rpc> blocks;
+     block_output_indices_rpc output_indices;
+     std::string status;
+     uint64_t start_height;
+     uint64_t current_height;
+    //  KV_MAP_SERIALIZABLE
     };
   };
 
