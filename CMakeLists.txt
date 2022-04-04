@@ -496,6 +496,7 @@ if (WITH_SYSTEMD AND NOT BUILD_STATIC_DEPS)
   pkg_check_modules(SYSTEMD libsystemd IMPORTED_TARGET)
 
     if(SYSTEMD_FOUND)
+    message("SYSTEMD_FOUND true")
       target_compile_definitions(systemd INTERFACE ENABLE_SYSTEMD)
       target_link_libraries(systemd INTERFACE PkgConfig::SYSTEMD)
     elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)

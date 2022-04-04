@@ -65,6 +65,8 @@
 #include "core_rpc_server_error_codes.h"
 #include "p2p/net_node.h"
 #include "version.h"
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 #undef BELDEX_DEFAULT_LOG_CATEGORY
 #define BELDEX_DEFAULT_LOG_CATEGORY "daemon.rpc"
@@ -556,10 +558,10 @@ namespace cryptonote { namespace rpc {
     PERF_TIMER(on_get_blocks);
     if (use_bootstrap_daemon_if_necessary<GET_BLOCKS_FAST_RPC>(req, res))
       return res;
-    std::cout << "Not Entering Bootstartp Node" << std::endl;
+
     std::vector<std::pair<std::pair<cryptonote::blobdata, crypto::hash>, std::vector<std::pair<crypto::hash, cryptonote::blobdata> > > > bs;
 
-    if(!m_core.find_blockchain_supplement(req.start_height, req.block_ids, bs, res.current_height, res.start_height, req.prune, !req.no_miner_tx, GET_BLOCKS_FAST_RPC::MAX_COUNT))
+    if(!m_core.find_blockchain_supplement(req.start_height, req.block_ids, bs, res.current_height, res.start_height, req.prune, !req.no_miner_tx, GET_BLOCKS_FAST::MAX_COUNT))
     {
       res.status = "Failed";
       return res;
@@ -568,36 +570,109 @@ namespace cryptonote { namespace rpc {
     size_t size = 0, ntxes = 0;
     res.blocks.reserve(bs.size());
     res.output_indices.reserve(bs.size());
-    block blk;
-    int block_height = req.start_height;
+    cryptonote::block blk;
+    cryptonote::transaction tx_hash;
     for(auto& bd: bs)
     {
       res.blocks.resize(res.blocks.size()+1);
-      res.blocks.back().block = tools::type_to_hex(bd.first.second);
-      if (!m_core.get_block_by_height(block_height, blk))
-        throw rpc_error{ERROR_INTERNAL, "Internal error: can't get block by height. Height = " + std::to_string(req.start_height) + '.'};
-      res.blocks.back().block_hash = tools::type_to_hex(get_block_hash(blk));
-      res.blocks.back().timestamp = blk.timestamp;
-      ++block_height;
+      // res.blocks.back().block_minor_tx = tools::type_to_hex(bd.first.second);
+      if(!parse_and_validate_block_from_blob(bd.first.first, blk))
+      {
+        MERROR("internal error, invalid block");
+        // res.status = "Failed";
+      }
+      std::string block_json = obj_to_json_str(blk);
+      //  std::string it = json;
+      auto t = json::parse(block_json);
+    
+      json::iterator it = t.find("miner_tx");
+      json::iterator miner_tx_vout = it.value().find("vout");
+      json::iterator miner_tx_vin = it.value().find("vin");
+      std::swap(t["miner_tx"]["outputs"], miner_tx_vout.value());
+      std::swap(t["miner_tx"]["inputs"], miner_tx_vin.value());
+      t["miner_tx"].erase("vout");
+      t["miner_tx"].erase("vin");
+      t.erase(t.find("POS"));
+        for(auto &out :t["miner_tx"]["outputs"])
+        {
+          json::iterator it = out.find("target");
+          std::swap(out["to_key"], it.value());
+          out.erase("target");
+        }
+      json::iterator miner_tx_ringct = it.value().find("rct_signatures");
+      std::swap(t["miner_tx"]["ringct"], miner_tx_ringct.value());
+      t["miner_tx"].erase("rct_signatures");
+
+      res.blocks.back().block = t.dump();
       size += bd.first.first.size();
       res.output_indices.push_back(GET_BLOCKS_FAST_RPC::block_output_indices());
       ntxes += bd.second.size();
       res.output_indices.back().indices.reserve(1 + bd.second.size());
       if (req.no_miner_tx)
         res.output_indices.back().indices.push_back(GET_BLOCKS_FAST_RPC::tx_output_indices());
-      res.blocks.back().txs.reserve(bd.second.size());
+      // res.blocks.back().txs.reserve(bd.second.size());
       for (std::vector<std::pair<crypto::hash, cryptonote::blobdata>>::iterator i = bd.second.begin(); i != bd.second.end(); ++i)
       {
-        // std::cout <<"i->first : " << i->first << std::endl;
-        res.blocks.back().txs.push_back({std::move(tools::type_to_hex(i->first)), crypto::null_hash});
-        // std::cout <<"res.blocks.back().txs : " << res.blocks.back().txs.back() << std::endl;
+        if (!parse_and_validate_tx_from_blob(i->second, tx_hash))
+        {
+          MERROR("Failed to parse block blob from tx pool when querying the missed transactions in block ");
+          // res.status = "Failed";
+        }
+        // res.blocks.back().transactions = obj_to_json_str(tx_hash);
+        std::string block_transactions = obj_to_json_str(tx_hash);
+
+        auto block_tx = json::parse(block_transactions);
+
+        // json::iterator tx_ringct = block_tx.find("rct_signatures");
+        // std::cout << "tx_ringct:" << tx_ringct.value() << std::endl;
+        if(block_tx.contains("rct_signatures")){
+           json::iterator tx_ringct = block_tx.find("rct_signatures");
+           std::swap(block_tx["ringct"], tx_ringct.value());
+           block_tx.erase("rct_signatures");
+        }
+        else {
+           block_tx["ringct"] = {};
+        }   
+        
+        json::iterator tx_vin = block_tx.find("vin");
+        json::iterator tx_vout = block_tx.find("vout");
+        std::swap(block_tx["inputs"], tx_vin.value());
+        std::swap(block_tx["outputs"], tx_vout.value());
+         for(auto &in :block_tx["inputs"])
+         {
+          json::iterator it = in.find("key");
+          std::swap(in["to_key"], it.value());
+          in.erase("key");
+           json::iterator it_to_key = in.find("to_key");
+           json::iterator inputs_k_image = it_to_key.value().find("k_image");
+           std::swap(in["to_key"]["key_image"], inputs_k_image.value());
+           in["to_key"].erase("k_image");
+         }
+         for(auto &out :block_tx["outputs"])
+         {
+          json::iterator it = out.find("target");
+          std::swap(out["to_key"], it.value());
+          out.erase("target");
+         }
+
+        block_tx.erase("vin");
+        block_tx.erase("vout");
+        res.blocks.back().transactions.push_back(block_tx.dump());
+        // res.blocks.back().txs.push_back({std::move(tools::type_to_hex(i->first)), crypto::null_hash});
         i->second.clear();
         i->second.shrink_to_fit();
-        size += res.blocks.back().txs.back().size();
+        size += res.blocks.back().transactions.size();
+        std::cout << "size : " << size << std::endl;
       }
 
+        if(bd.second.size() == 0)
+        {
+          std::cout << "entered into the tx_check" << std::endl;
+          json tx = json::array();
+          res.blocks.back().transactions.push_back(tx.dump());
+        }
+
       const size_t n_txes_to_lookup = bd.second.size() + (req.no_miner_tx ? 0 : 1);
-      // std::cout << "n_txes_to_lookup : " << n_txes_to_lookup << std::endl;
       if (n_txes_to_lookup > 0)
       {
         std::vector<std::vector<uint64_t>> indices;
@@ -611,13 +686,6 @@ namespace cryptonote { namespace rpc {
           res.output_indices.back().indices.push_back({std::move(indices[i])});
       }
     }
-
-    // for(auto it : res.blocks)
-    // {
-    //   std::cout << " it->block : " << it.block <<std::endl;
-    //   for(auto tx :it.txs)
-    //   std::cout << " it->txs : " << tx <<std::endl;
-    // }
 
     MDEBUG("on_get_blocks: " << bs.size() << " blocks, " << ntxes << " txes, size " << size);
     res.status = STATUS_OK;
@@ -997,7 +1065,7 @@ namespace cryptonote { namespace rpc {
       return res;
     }
     LOG_PRINT_L2("Found " << txs.size() << "/" << vh.size() << " transactions on the blockchain");
-
+    std::cout << "Found " << txs.size() << "/" << vh.size() << " transactions on the blockchain" << std::endl;
     // try the pool for any missing txes
     auto &pool = m_core.get_pool();
     size_t found_in_pool = 0;
@@ -1110,6 +1178,7 @@ namespace cryptonote { namespace rpc {
         tx_data += prunable_data;
         if (!req.decode_as_json)
           e.as_hex = oxenmq::to_hex(tx_data);
+          // std::cout << "as_hex : " <<e.as_hex << std::endl;
       }
 
       cryptonote::transaction t;
@@ -1133,7 +1202,10 @@ namespace cryptonote { namespace rpc {
             return res;
           }
           if (req.decode_as_json)
+          {
             e.as_json = obj_to_json_str(t);
+            std::cout << "obj_to_json_str(t) : " << obj_to_json_str(t) << std::endl;
+          }    
         }
 
         if (req.tx_extra)

@@ -2621,6 +2621,7 @@ cryptonote::blobdata BlockchainLMDB::get_block_blob_from_height(uint64_t height)
 {
   LOG_PRINT_L3("BlockchainLMDB::" << __func__);
   cryptonote::blobdata result = get_and_convert_block_blob_from_height<blobdata>(height);
+  // std::cout << "blob data result : " << result << std::endl;
   return result;
 }
 

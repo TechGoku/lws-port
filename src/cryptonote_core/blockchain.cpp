@@ -2792,6 +2792,7 @@ bool Blockchain::find_blockchain_supplement_rpc(const std::list<crypto::hash>& q
   for(size_t i = start_height; i < stop_height && count < BLOCKS_IDS_SYNCHRONIZING_DEFAULT_COUNT; i++, count++)
   {
     hashes.push_back(m_db->get_block_hash_from_height(i));
+    std::cout << " hashes : " << hashes[i] << std::endl;
   }
   std::cout <<" hashes.size() : " << hashes.size() << std::endl;
   return true;

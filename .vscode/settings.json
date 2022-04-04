@@ -73,9 +73,9 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp",
-        "ranges": "cpp",
         "compare": "cpp",
         "concepts": "cpp",
+        "ranges": "cpp",
         "stop_token": "cpp"
     }
 }
