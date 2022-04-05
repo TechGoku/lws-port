@@ -5,6 +5,7 @@
 
 #include "common/pod-class.h" // beldex/src
 #include "wire/json/fwd.h"
+#include "rpc/message_data_structs.h" // monero/src
 
 namespace crypto
 {

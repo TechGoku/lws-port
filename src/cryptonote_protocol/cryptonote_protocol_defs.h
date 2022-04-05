@@ -129,7 +129,7 @@ namespace cryptonote
   /*                                                                      */
   /************************************************************************/
   BELDEX_RPC_DOC_INTROSPECT
-  struct block_complete_entry_rpc
+  struct block_complete_entry
   {
     blobdata block;
     std::vector<blobdata> txs;
@@ -138,20 +138,6 @@ namespace cryptonote
     KV_MAP_SERIALIZABLE
   };
 
-
-  BELDEX_RPC_DOC_INTROSPECT
-  struct block_complete_entry_rpc
-  {
-    std::string block;
-    std::string block_hash;
-    uint64_t timestamp;
-    std::string json;
-    std::string json_tx;
-    std::vector<std::string> txs;
-    blobdata checkpoint;
-    std::vector<serializable_flash_metadata> flashes;
-    KV_MAP_SERIALIZABLE
-  };
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/

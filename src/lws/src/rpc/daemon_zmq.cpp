@@ -1,14 +1,13 @@
 #include "daemon_zmq.h"
 
 #include <boost/optional/optional.hpp>
-#include "crypto/crypto.h"            // beldex/src
-#include "rpc/message_data_structs.h" // beldex/src
-#include "ringct/rctTypes.h"          // beldex/src
+#include "crypto/crypto.h"            // monero/src
+#include "rpc/message_data_structs.h" // monero/src
 #include "wire/crypto.h"
 #include "wire/json.h"
 #include "wire/vector.h"
 #include "wire/read.h"
-#include "wire/write.h"
+#include "cryptonote_basic/txtypes.h"
 
 namespace
 {
@@ -21,6 +20,7 @@ namespace
 
 namespace rct
 {
+
   static void read_bytes(wire::json_reader& source, ctkey& self)
   {
     self.dest = {};
@@ -57,10 +57,22 @@ namespace rct
     else if (ecdhInfo || outPk || txnFee)
       WIRE_DLOG_THROW(wire::error::schema::invalid_key, "Did not expected `encrypted`, `commitments`, or `fee`");
   }
+  
+  static void read_bytes(wire::json_reader& source,wire::field_<std::reference_wrapper<RCTType>, true>::value_type& self)
+  {
+    unsigned char dest = (unsigned char)self;
+    wire::read_bytes(source, dest);
+  }
+
 } // rct
 
 namespace cryptonote
 {
+  static void read_bytes(wire::json_reader& source,wire::field_<std::reference_wrapper<cryptonote::txversion>, true>::value_type& self)
+  {
+    unsigned long dest = (unsigned long)self;
+    wire::read_bytes(source, dest);
+  }
   static void read_bytes(wire::json_reader& source, txout_to_script& self)
   {
     wire::object(source, WIRE_FIELD(keys), WIRE_FIELD(script));
@@ -158,4 +170,3 @@ void lws::rpc::read_bytes(wire::json_reader& source, get_blocks_fast_response& s
   self.output_indices.reserve(default_blocks_fetched);
   wire::object(source, WIRE_FIELD(blocks), WIRE_FIELD(output_indices), WIRE_FIELD(start_height), WIRE_FIELD(current_height));
 }
-

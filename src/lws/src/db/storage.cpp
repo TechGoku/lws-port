@@ -16,7 +16,7 @@
 #include "cryptonote_basic/cryptonote_basic.h"
 #include "cryptonote_core/cryptonote_tx_utils.h"
 #include "common/expect.h"   //beldex/src
-// #include "db/string.h"
+#include "db/string.h"
 #include "error.h"
 #include "epee/hex.h"
 #include "data.h"
@@ -27,8 +27,9 @@
 #include "lmdb/util.h"
 #include "lmdb/value_stream.h"
 #include "epee/span.h"
-// #include "wire/filters.h"
-// #include "wire/json.h"
+#include "wire/filters.h"
+#include "wire/json.h"
+
 namespace lws
 {
 namespace db
@@ -334,7 +335,7 @@ namespace db
 
       //max_internal = std::min(std::size_t(64), max_internal);
       //out.reserve(12 + max_internal);
-      // std::cout << " block version : " << blocks_version << std::endl;
+      std::cout << " block version : " << blocks_version << std::endl;
 
       MDB_val key = lmdb::to_val(blocks_version);
       MDB_val value{};
@@ -517,142 +518,143 @@ namespace db
     MONERO_CHECK(check_cursor(*txn, db->tables.outputs, cur));
     return outputs.get_value_stream(id, std::move(cur));
   }
-  // namespace
-  // {
-  //   //! `write_bytes` implementation will forward a third argument for `show_keys`.
-  //   template<typename T>
-  //   struct show_keys_wrapper
-  //   {
-  //     T value;
-  //     bool show_keys;
-  //   };
 
-  //   //! Filter that will instruct type to `show_keys` (or not).
-  //   struct toggle_key_output
-  //   {
-  //     const bool show_keys;
+    namespace
+  {
+    //! `write_bytes` implementation will forward a third argument for `show_keys`.
+    template<typename T>
+    struct show_keys_wrapper
+    {
+      T value;
+      bool show_keys;
+    };
 
-  //     template<typename T>
-  //     show_keys_wrapper<T> operator()(T value) const noexcept
-  //     {
-  //       return {std::move(value), show_keys};
-  //     }
-  //   };
+    //! Filter that will instruct type to `show_keys` (or not).
+    struct toggle_key_output
+    {
+      const bool show_keys;
 
-  //   struct output_id_key
-  //   {
-  //     std::string operator()(const output_id id) const
-  //     {
-  //       return std::to_string(id.high) + ":" + std::to_string(id.low);
-  //     }
-  //   };
+      template<typename T>
+      show_keys_wrapper<T> operator()(T value) const noexcept
+      {
+        return {std::move(value), show_keys};
+      }
+    };
 
-  //   template<typename T>
-  //   void write_bytes(wire::json_writer& dest, show_keys_wrapper<T> self)
-  //   {
-  //     lws::db::write_bytes(dest, self.value, self.show_keys);
-  //   }
-  //   void write_bytes(wire::json_writer& dest, const account_lookup self)
-  //   {
-  //     wire::object(dest, WIRE_FIELD_COPY(id), WIRE_FIELD_COPY(status));
-  //   }
-  // }
+    struct output_id_key
+    {
+      std::string operator()(const output_id id) const
+      {
+        return std::to_string(id.high) + ":" + std::to_string(id.low);
+      }
+    };
+
+    template<typename T>
+    void write_bytes(wire::json_writer& dest, show_keys_wrapper<T> self)
+    {
+      lws::db::write_bytes(dest, self.value, self.show_keys);
+    }
+    void write_bytes(wire::json_writer& dest, const account_lookup self)
+    {
+      wire::object(dest, WIRE_FIELD_COPY(id), WIRE_FIELD_COPY(status));
+    }
+  }
   
-  // // accounts_by_height is output as a sorted array of objects
-  // static void write_bytes(wire::json_writer& dest, std::pair<block_id, boost::iterator_range<lmdb::value_iterator<account_lookup>>> self)
-  // {
-  //   wire::object(dest,
-  //     wire::field("scan_height", self.first),
-  //     wire::field("accounts", wire::as_array(std::move(self.second)))
-  //   );
-  // }
+  // accounts_by_height is output as a sorted array of objects
+  static void write_bytes(wire::json_writer& dest, std::pair<block_id, boost::iterator_range<lmdb::value_iterator<account_lookup>>> self)
+  {
+    wire::object(dest,
+      wire::field("scan_height", self.first),
+      wire::field("accounts", wire::as_array(std::move(self.second)))
+    );
+  }
   
-  //  expect<void> storage_reader::json_debug(std::ostream& out, bool show_keys)
-  // {
-  //   using boost::adaptors::reverse;
-  //   using boost::adaptors::transform;
+  expect<void> storage_reader::json_debug(std::ostream& out, bool show_keys)
+  {
+    using boost::adaptors::reverse;
+    using boost::adaptors::transform;
 
-  //   MONERO_PRECOND(txn != nullptr);
-  //   assert(db != nullptr);
+    MONERO_PRECOND(txn != nullptr);
+    assert(db != nullptr);
 
-  //   const auto address_as_key = [](account_by_address const& src)
-  //   {
-  //     return std::make_pair(address_string(src.address), src.lookup);
-  //   };
+    const auto address_as_key = [](account_by_address const& src)
+    {
+      return std::make_pair(address_string(src.address), src.lookup);
+    };
 
-  //   cursor::accounts accounts_cur;
-  //   cursor::outputs outputs_cur;
-  //   cursor::spends spends_cur;
-  //   cursor::images images_cur;
-  //   cursor::requests requests_cur;
+    cursor::accounts accounts_cur;
+    cursor::outputs outputs_cur;
+    cursor::spends spends_cur;
+    cursor::images images_cur;
+    cursor::requests requests_cur;
 
-  //   MONERO_CHECK(check_cursor(*txn, db->tables.blocks, curs.blocks_cur));
-  //   MONERO_CHECK(check_cursor(*txn, db->tables.accounts, accounts_cur));
-  //   MONERO_CHECK(check_cursor(*txn, db->tables.accounts_ba, curs.accounts_ba_cur));
-  //   MONERO_CHECK(check_cursor(*txn, db->tables.accounts_bh, curs.accounts_bh_cur));
-  //   MONERO_CHECK(check_cursor(*txn, db->tables.outputs, outputs_cur));
-  //   MONERO_CHECK(check_cursor(*txn, db->tables.spends, spends_cur));
-  //   MONERO_CHECK(check_cursor(*txn, db->tables.images, images_cur));
-  //   MONERO_CHECK(check_cursor(*txn, db->tables.requests, requests_cur));
+    MONERO_CHECK(check_cursor(*txn, db->tables.blocks, curs.blocks_cur));
+    MONERO_CHECK(check_cursor(*txn, db->tables.accounts, accounts_cur));
+    MONERO_CHECK(check_cursor(*txn, db->tables.accounts_ba, curs.accounts_ba_cur));
+    MONERO_CHECK(check_cursor(*txn, db->tables.accounts_bh, curs.accounts_bh_cur));
+    MONERO_CHECK(check_cursor(*txn, db->tables.outputs, outputs_cur));
+    MONERO_CHECK(check_cursor(*txn, db->tables.spends, spends_cur));
+    MONERO_CHECK(check_cursor(*txn, db->tables.images, images_cur));
+    MONERO_CHECK(check_cursor(*txn, db->tables.requests, requests_cur));
 
-  //   auto blocks_partial =
-  //     get_blocks<boost::container::static_vector<block_info, 12>>(*curs.blocks_cur, 0);
-  //   if (!blocks_partial)
-  //     return blocks_partial.error();
+    auto blocks_partial =
+      get_blocks<boost::container::static_vector<block_info, 12>>(*curs.blocks_cur, 0);
+    if (!blocks_partial)
+      return blocks_partial.error();
 
-  //   auto accounts_stream = accounts.get_key_stream(std::move(accounts_cur));
-  //   if (!accounts_stream)
-  //     return accounts_stream.error();
+    auto accounts_stream = accounts.get_key_stream(std::move(accounts_cur));
+    if (!accounts_stream)
+      return accounts_stream.error();
 
-  //   auto accounts_ba_stream = accounts_by_address.get_value_stream(
-  //     by_address_version, std::move(curs.accounts_ba_cur)
-  //   );
-  //   if (!accounts_ba_stream)
-  //     return accounts_ba_stream.error();
+    auto accounts_ba_stream = accounts_by_address.get_value_stream(
+      by_address_version, std::move(curs.accounts_ba_cur)
+    );
+    if (!accounts_ba_stream)
+      return accounts_ba_stream.error();
 
-  //   auto accounts_bh_stream = accounts_by_height.get_key_stream(
-  //     std::move(curs.accounts_bh_cur)
-  //   );
-  //   if (!accounts_bh_stream)
-  //     return accounts_bh_stream.error();
+    auto accounts_bh_stream = accounts_by_height.get_key_stream(
+      std::move(curs.accounts_bh_cur)
+    );
+    if (!accounts_bh_stream)
+      return accounts_bh_stream.error();
 
-  //   auto outputs_stream = outputs.get_key_stream(std::move(outputs_cur));
-  //   if (!outputs_stream)
-  //     return outputs_stream.error();
+    auto outputs_stream = outputs.get_key_stream(std::move(outputs_cur));
+    if (!outputs_stream)
+      return outputs_stream.error();
 
-  //   auto spends_stream = spends.get_key_stream(std::move(spends_cur));
-  //   if (!spends_stream)
-  //     return spends_stream.error();
+    auto spends_stream = spends.get_key_stream(std::move(spends_cur));
+    if (!spends_stream)
+      return spends_stream.error();
 
-  //   auto images_stream = images.get_key_stream(std::move(images_cur));
-  //   if (!images_stream)
-  //     return images_stream.error();
+    auto images_stream = images.get_key_stream(std::move(images_cur));
+    if (!images_stream)
+      return images_stream.error();
 
-  //   auto requests_stream = requests.get_key_stream(std::move(requests_cur));
-  //   if (!requests_stream)
-  //     return requests_stream.error();
+    auto requests_stream = requests.get_key_stream(std::move(requests_cur));
+    if (!requests_stream)
+      return requests_stream.error();
 
-  //   const wire::as_array_filter<toggle_key_output> toggle_keys_filter{{show_keys}};
-  //   wire::json_stream_writer json_stream{out};
-  //   wire::object(json_stream,
-  //     wire::field(blocks.name, wire::as_array(reverse(*blocks_partial))),
-  //     wire::field(accounts.name, wire::as_object(accounts_stream->make_range(), wire::enum_as_string, toggle_keys_filter)),
-  //     wire::field(accounts_by_address.name, wire::as_object(transform(accounts_ba_stream->make_range(), address_as_key))),
-  //     wire::field(accounts_by_height.name, wire::as_array(accounts_bh_stream->make_range())),
-  //     wire::field(outputs.name, wire::as_object(outputs_stream->make_range(), wire::as_integer, wire::as_array)),
-  //     wire::field(spends.name, wire::as_object(spends_stream->make_range(), wire::as_integer, wire::as_array)),
-  //     wire::field(images.name, wire::as_object(images_stream->make_range(), output_id_key{}, wire::as_array)),
-  //     wire::field(requests.name, wire::as_object(requests_stream->make_range(), wire::enum_as_string, toggle_keys_filter))
-  //   );
-  //   json_stream.finish();
+    const wire::as_array_filter<toggle_key_output> toggle_keys_filter{{show_keys}};
+    wire::json_stream_writer json_stream{out};
+    wire::object(json_stream,
+      wire::field(blocks.name, wire::as_array(reverse(*blocks_partial))),
+      wire::field(accounts.name, wire::as_object(accounts_stream->make_range(), wire::enum_as_string, toggle_keys_filter)),
+      wire::field(accounts_by_address.name, wire::as_object(transform(accounts_ba_stream->make_range(), address_as_key))),
+      wire::field(accounts_by_height.name, wire::as_array(accounts_bh_stream->make_range())),
+      wire::field(outputs.name, wire::as_object(outputs_stream->make_range(), wire::as_integer, wire::as_array)),
+      wire::field(spends.name, wire::as_object(spends_stream->make_range(), wire::as_integer, wire::as_array)),
+      wire::field(images.name, wire::as_object(images_stream->make_range(), output_id_key{}, wire::as_array)),
+      wire::field(requests.name, wire::as_object(requests_stream->make_range(), wire::enum_as_string, toggle_keys_filter))
+    );
+    json_stream.finish();
 
-  //   curs.accounts_ba_cur = accounts_ba_stream->give_cursor();
-  //   curs.accounts_bh_cur = accounts_bh_stream->give_cursor();
+    curs.accounts_ba_cur = accounts_ba_stream->give_cursor();
+    curs.accounts_bh_cur = accounts_bh_stream->give_cursor();
 
-  //   if (!out.good())
-  //     return {std::io_errc::stream};
-  //   return success();
-  // }
+    if (!out.good())
+      return {std::io_errc::stream};
+    return success();
+  }
 
   lmdb::suspended_txn storage_reader::finish_read() noexcept
   {
@@ -1039,45 +1041,46 @@ namespace db
 
     return db->try_write([this, height, chain, users] (MDB_txn& txn) -> expect<std::size_t>
     {
+      std::cout << " in try_write function " << std::endl;
       epee::span<const crypto::hash> chain_copy{chain};
       const std::uint64_t last_update =
         lmdb::to_native(height) + chain.size() - 1;
 
-      if (get_checkpoints().get_max_height() <= last_update)
-      {
-        cursor::blocks blocks_cur;
-        MONERO_CHECK(check_cursor(txn, this->db->tables.blocks, blocks_cur));
+      // if (get_checkpoints().get_max_height() <= last_update)
+      // {
+      //   cursor::blocks blocks_cur;
+      //   MONERO_CHECK(check_cursor(txn, this->db->tables.blocks, blocks_cur));
 
-        MDB_val key = lmdb::to_val(blocks_version);
-        MDB_val value;
-        MONERO_LMDB_CHECK(mdb_cursor_get(blocks_cur.get(), &key, &value, MDB_SET));
-        MONERO_LMDB_CHECK(mdb_cursor_get(blocks_cur.get(), &key, &value, MDB_LAST_DUP));
+      //   MDB_val key = lmdb::to_val(blocks_version);
+      //   MDB_val value;
+      //   MONERO_LMDB_CHECK(mdb_cursor_get(blocks_cur.get(), &key, &value, MDB_SET));
+      //   MONERO_LMDB_CHECK(mdb_cursor_get(blocks_cur.get(), &key, &value, MDB_LAST_DUP));
 
-        const expect<block_info> last_block = blocks.get_value<block_info>(value);
-        if (!last_block)
-          return last_block.error();
-        if (last_block->id < height)
-          return {lws::error::bad_blockchain};
+      //   const expect<block_info> last_block = blocks.get_value<block_info>(value);
+      //   if (!last_block)
+      //     return last_block.error();
+      //   if (last_block->id < height)
+      //     return {lws::error::bad_blockchain};
 
-        const std::uint64_t last_same =
-          std::min(lmdb::to_native(last_block->id), last_update);
+      //   const std::uint64_t last_same =
+      //     std::min(lmdb::to_native(last_block->id), last_update);
 
-        const expect<crypto::hash> hash_check =
-          do_get_block_hash(*blocks_cur, block_id(last_same));
-        if (!hash_check)
-          return hash_check.error();
+      //   const expect<crypto::hash> hash_check =
+      //     do_get_block_hash(*blocks_cur, block_id(last_same));
+      //   if (!hash_check)
+      //     return hash_check.error();
 
-        const std::uint64_t offset = last_same - lmdb::to_native(height);
-        if (*hash_check != *(chain_copy.begin() + offset))
-          return {lws::error::blockchain_reorg};
+      //   const std::uint64_t offset = last_same - lmdb::to_native(height);
+      //   if (*hash_check != *(chain_copy.begin() + offset))
+      //     return {lws::error::blockchain_reorg};
 
-        chain_copy.remove_prefix(offset + 1);
-        MONERO_CHECK(
-          append_block_hashes(
-            *blocks_cur, block_id(lmdb::to_native(height) + offset + 1), chain_copy
-          )
-        );
-      }
+      //   chain_copy.remove_prefix(offset + 1);
+      //   MONERO_CHECK(
+      //     append_block_hashes(
+      //       *blocks_cur, block_id(lmdb::to_native(height) + offset + 1), chain_copy
+      //     )
+      //   );
+      // }
 
       cursor::accounts            accounts_cur;
       cursor::accounts_by_address accounts_ba_cur;
@@ -1091,7 +1094,7 @@ namespace db
       MONERO_CHECK(check_cursor(txn, this->db->tables.outputs, outputs_cur));
       MONERO_CHECK(check_cursor(txn, this->db->tables.spends, spends_cur));
       MONERO_CHECK(check_cursor(txn, this->db->tables.images, images_cur));
-
+      std::cout << " in check_cursor function " << std::endl;
       // for bulk inserts
       boost::container::static_vector<account_lookup, 127> heights{};
       static_assert(sizeof(heights) <= 1024, "stack vector is large");
@@ -1099,6 +1102,7 @@ namespace db
       std::size_t updated = 0;
       for (auto user = users.begin() ;; ++user)
       {
+        std::cout << " in user function " << std::endl;
         if (heights.size() == heights.capacity() || user == users.end())
         {
           // bulk update account height index
@@ -1163,6 +1167,7 @@ namespace db
 
         ++updated;
       } // ... for every account being updated ...
+      std::cout << " in updated function " << std::endl;
       return updated;
     });
   }
