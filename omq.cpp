@@ -3,8 +3,8 @@
 #include <string_view>
 #include <map>
 #include <set>
-#include "oxenmq/oxenmq.h"
-#include "oxenmq/connections.h"
+#include <oxenmq/oxenmq.h>
+#include <oxenmq/connections.h>
 #include <chrono>
 using namespace oxenmq;
 int main()
@@ -16,7 +16,7 @@ int main()
      m_LMQ->start();
  std::cout << "before connect remote ";
     std::cout << "before connect remote ";
-auto c = m_LMQ->connect_remote("tcp://192.168.1.35:4567",
+auto c = m_LMQ->connect_remote("tcp://127.0.0.1:4567",
       [](ConnectionID conn) { std::cout << "Connected \n";},
       [](ConnectionID conn, std::string_view f) { std::cout << "connect failed: \n";}
       );
@@ -27,6 +27,6 @@ auto c = m_LMQ->connect_remote("tcp://192.168.1.35:4567",
             std::cout << "Current height: " << d[1] << "\n";
             else
             std::cout << "Timeout fetching height!";
-        }, "{\"start_height\":0}}" );
+        }, "{\"start_height\":1074749}}" );
         std::this_thread::sleep_for(20s);
 }
