@@ -876,9 +876,11 @@ namespace db
         );
 
         if (!crypto::secret_key_to_public_key(copy, verify))
+        std::cout<<"storage.cpp file verifcation line no 879",copy ,verify;
           return {lws::error::bad_view_key};
 
         if (verify != user.address.view_public)
+        std::cout<<"storage.cpp user address view public",user.address.view_public;
           return {lws::error::bad_view_key};
       }
 

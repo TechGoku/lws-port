@@ -11,6 +11,7 @@
 #include "db/data.h"
 #include "util/random_outputs.h"
 #include "wire.h"
+#include "wire/json/fwd.h"
 
 namespace lws
 {
@@ -19,12 +20,15 @@ namespace lws
         enum class safe_uint64 : std::uint64_t
         {
         };
+        void read_bytes(wire::json_reader&, safe_uint64&);
+        void write_bytes(wire::json_writer&, safe_uint64);
 
         //! Read an array of uint64 values as JSON strings.
         struct safe_uint64_array
         {
             std::vector<std::uint64_t> values; // so this can be passed to another function without copy
         };
+        void read_bytes(wire::json_reader&, safe_uint64_array&);
 
         struct get_random_outs_request
         {
@@ -32,16 +36,21 @@ namespace lws
             std::uint64_t count;
             safe_uint64_array amounts;
         };
+        void read_bytes(wire::json_reader&, get_random_outs_request&);
         struct get_random_outs_response
         {
             get_random_outs_response() = delete;
             std::vector<random_ring> amount_outs;
         };
+        void write_bytes(wire::json_writer&, get_random_outs_response&);
+
         struct account_credentials
         {
             lws::db::account_address address;
             crypto::secret_key key;
         };
+        void read_bytes(wire::json_reader&, account_credentials&);
+
 
         struct import_response
         {
@@ -51,6 +60,8 @@ namespace lws
             bool new_request;
             bool request_fulfilled;
         };
+        void write_bytes(wire::json_writer&, const import_response&);
+
 
         struct login_request
         {
@@ -59,6 +70,8 @@ namespace lws
             bool create_account;
             bool generated_locally;
         };
+        void read_bytes(wire::json_reader&, login_request&);
+
 
         struct login_response
         {
@@ -66,6 +79,8 @@ namespace lws
             bool new_address;
             bool generated_locally;
         };
+        void write_bytes(wire::json_writer&, login_response);
+
         struct get_unspent_outs
         {
             struct request_t

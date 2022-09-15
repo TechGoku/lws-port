@@ -43,6 +43,10 @@ using namespace epee;
 #define HTTP_MAX_HEADER_LEN		 100000
 #define HTTP_MAX_STARTING_NEWLINES       8
 
+#ifndef OUT
+  #define OUT
+#endif
+
 namespace epee
 {
 namespace net_utils
@@ -556,15 +560,16 @@ namespace net_utils
 	}
 	//-----------------------------------------------------------------------------------
   template<class t_connection_context>
-	bool simple_http_connection_handler<t_connection_context>::get_len_from_content_lenght(const std::string& str, size_t& OUT)
+	bool simple_http_connection_handler<t_connection_context>::get_len_from_content_lenght(const std::string& str, size_t& OUT len)
 	{
 		STATIC_REGEXP_EXPR_1(rexp_mach_field, "\\d+", boost::regex::normal);
 		std::string res;
 		boost::smatch result;
 		if(!(boost::regex_search( str, result, rexp_mach_field, boost::match_default) && result[0].matched))
 			return false;
-		size_t len;
+		std::cout << "in side the content length\n";
 		try { len = boost::lexical_cast<size_t>(result[0]); }
+
 		catch(...) { return false; }
 		return true;
 	}

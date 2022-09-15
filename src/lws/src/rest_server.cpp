@@ -104,8 +104,11 @@ namespace lws
     bool key_check(const rpc::account_credentials& creds){
         crypto::public_key verify{};
         if (!crypto::secret_key_to_public_key(creds.key, verify))
+        std::cout<< " secret key to public";
             return false;
         if (verify != creds.address.view_public)
+        std::cout<< "verify area rest server \n", verify;
+        std::cout<<"\nview-public\n",creds.address.view_public;
             return false;
         return true;
         }
@@ -114,6 +117,7 @@ namespace lws
     expect<std::pair<db::account, db::storage_reader>> open_account(const lws::rpc::account_credentials& creds, db::storage disk)
     {
       if (!key_check(creds))
+      std::cout<<"cred area rest server",creds;
         return {lws::error::bad_view_key};
 
       auto reader = disk.start_read();
@@ -259,7 +263,9 @@ namespace lws
 
       static expect<response> handle(request req, db::storage disk)
       {
+        std::cout << "-----------------------------------------\n";
         if (!key_check(req.creds))
+        std::cout<<"cread req cred\n",req.creds,"\n";
           return {lws::error::bad_view_key};
 
         {
@@ -505,7 +511,7 @@ expect<epee::byte_slice> call(string &&root, db::storage disk)
 {
     using request = typename E::request;
     using response = typename E::response;
-
+    std::cout <<"called the endpoint\n";
     expect<request> req = wire::json::from_bytes<request>(move(root));
     if (!req)
         return req.error();
@@ -524,11 +530,11 @@ struct endpoint
 };
 
 constexpr const endpoint endpoints[] = {
-    {"/submit_raw_tx",      call<submit_raw_tx>,    2 * 1024},
-    {"/get_random_outs",    call<get_random_outs>,  2 * 1024},
-    {"/get_unspent_outs",   call<get_unspent_outs>, 2 * 1024},
-    {"/get_random_outs",    call<login>,            2 * 1024},
-    {"/get_address_txs",    call<get_address_txs>,  2 * 1024}
+    // {"/submit_raw_tx",      call<submit_raw_tx>,    2 * 1024},
+    // {"/get_random_outs",    call<get_random_outs>,  2 * 1024},
+    // {"/get_unspent_outs",   call<get_unspent_outs>, 2 * 1024},
+    {"/login",    call<login>,            2 * 1024},
+    // {"/get_address_txs",    call<get_address_txs>,  2 * 1024}
 
     };
     struct by_name_

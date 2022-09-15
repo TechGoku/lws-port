@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 
 find_package(nlohmann_json 3.7.0 REQUIRED)
-
-add_library(beldex-lws-rpc light_wallet.h)
+set(beldex-lws-rpc-sources light_wallet.cpp)
+set(beldex-lws-rpc-header light_wallet.h)
+add_library(beldex-lws-rpc ${beldex-lws-rpc-header} ${beldex-lws-rpc-sources})
 
 target_link_libraries(beldex-lws-rpc 
         PRIVATE
